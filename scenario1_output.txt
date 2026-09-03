@@ -1,0 +1,196 @@
+sagemaker-user@default:~$ python3 scenario1.py 
+
+
+====================================================================================================
+SCENARIO 1
+AIP + STS TAG MISMATCH - MULTIPLE MODELS
+====================================================================================================
+
+AIP ATTRIBUTION
+ApplicationShortname = grh-aip
+AssetID              = MSR06632-AIP
+
+STS ATTRIBUTION
+ApplicationShortname = grh-sts
+AssetID              = MSR99999-STS
+
+================================================================================
+CURRENT SAGEMAKER IDENTITY
+================================================================================
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/SageMaker
+
+================================================================================
+ASSUMING ROLE WITH STS SESSION TAGS
+================================================================================
+ApplicationShortname = grh-sts
+AssetID              = MSR99999-STS
+
+================================================================================
+TAGGED ASSUMED IDENTITY
+================================================================================
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario1AIPSTSMismatch
+
+Expected STS session tags:
+ApplicationShortname = grh-sts
+AssetID              = MSR99999-STS
+
+================================================================================
+CREATING AIP: Claude Sonnet 5
+================================================================================
+AIP Name   : s1-claude-sonnet-5-20260903-180140
+Source ARN : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.anthropic.claude-sonnet-5
+
+AIP Tags:
+ApplicationShortname = grh-aip
+AssetID              = MSR06632-AIP
+
+AIP CREATED SUCCESSFULLY
+AIP ARN: arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/drqki9udvoww
+
+================================================================================
+TESTING: Claude Sonnet 5
+================================================================================
+Underlying model: us.anthropic.claude-sonnet-5
+AIP ARN         : arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/drqki9udvoww
+
+MODEL RESPONSE:
+AWS Bedrock granular cost attribution refers to the practice of tracking and allocating costs at a detailed level—such as by application, team, user, or specific model invocation—rather than viewing Bedrock spend as a single aggregated bill. This is typically achieved by leveraging AWS cost allocation tags applied to resources, custom request headers/metadata passed with inference calls, and tools like AWS Cost Explorer or Cost and Usage Reports (CUR) combined with CloudWatch metrics to correlate usage patterns with specific business units or use cases. Because Bedrock charges are usage-based (per input/output token, per model, or via provisioned throughput), granular attribution requires capturing metadata at the API call level and often integrating with logging solutions (like Bedrock's model
+
+STATUS: SUCCESS
+
+================================================================================
+CREATING AIP: Claude Opus 5
+================================================================================
+AIP Name   : s1-claude-opus-5-20260903-180148
+Source ARN : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.anthropic.claude-opus-5
+
+AIP Tags:
+ApplicationShortname = grh-aip
+AssetID              = MSR06632-AIP
+
+AIP CREATED SUCCESSFULLY
+AIP ARN: arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/5xt0r1c2ywf1
+
+================================================================================
+TESTING: Claude Opus 5
+================================================================================
+Underlying model: us.anthropic.claude-opus-5
+AIP ARN         : arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/5xt0r1c2ywf1
+
+MODEL RESPONSE:
+
+
+STATUS: SUCCESS
+
+================================================================================
+CREATING AIP: Amazon Nova 2 Lite
+================================================================================
+AIP Name   : s1-amazon-nova-2-lite-20260903-180155
+Source ARN : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.amazon.nova-2-lite-v1:0
+
+AIP Tags:
+ApplicationShortname = grh-aip
+AssetID              = MSR06632-AIP
+
+AIP CREATED SUCCESSFULLY
+AIP ARN: arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/0n8hfm52tdq8
+
+================================================================================
+TESTING: Amazon Nova 2 Lite
+================================================================================
+Underlying model: us.amazon.nova-2-lite-v1:0
+AIP ARN         : arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/0n8hfm52tdq8
+
+MODEL RESPONSE:
+AWS Bedrock offers granular cost attribution through detailed billing reports and tags that help users track and allocate costs with precision. By enabling users to apply cost allocation tags to Bedrock resources and API requests, organizations can categorize expenses by departments, projects, or specific AI models used. This level of detail allows for better financial oversight, budgeting, and optimization of AI-driven workloads on AWS.
+
+STATUS: SUCCESS
+
+================================================================================
+CREATING AIP: Meta Llama 4 Maverick
+================================================================================
+AIP Name   : s1-meta-llama-4-maverick-20260903-180159
+Source ARN : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.meta.llama4-maverick-17b-instruct-v1:0
+
+AIP Tags:
+ApplicationShortname = grh-aip
+AssetID              = MSR06632-AIP
+
+AIP CREATED SUCCESSFULLY
+AIP ARN: arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/v411rzqa9l99
+
+================================================================================
+TESTING: Meta Llama 4 Maverick
+================================================================================
+Underlying model: us.meta.llama4-maverick-17b-instruct-v1:0
+AIP ARN         : arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/v411rzqa9l99
+
+MODEL RESPONSE:
+AWS Bedrock provides granular cost attribution through features like cost allocation tags and detailed usage records, allowing users to track and allocate costs to specific projects, teams, or applications. This enables organizations to gain a better understanding of their AI and machine learning expenses, making it easier to manage budgets and optimize resource utilization. By using these features, users can attribute costs to specific foundation models, fine-tuned models, or agents, providing a detailed breakdown of their Bedrock expenses.
+
+STATUS: SUCCESS
+
+
+====================================================================================================
+CLEANUP - DELETING APPLICATION INFERENCE PROFILES
+====================================================================================================
+
+--------------------------------------------------------------------------------
+Deleting AIP for: Claude Sonnet 5
+AIP ARN: arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/drqki9udvoww
+CLEANUP STATUS: SUCCESS
+
+--------------------------------------------------------------------------------
+Deleting AIP for: Claude Opus 5
+AIP ARN: arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/5xt0r1c2ywf1
+CLEANUP STATUS: SUCCESS
+
+--------------------------------------------------------------------------------
+Deleting AIP for: Amazon Nova 2 Lite
+AIP ARN: arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/0n8hfm52tdq8
+CLEANUP STATUS: SUCCESS
+
+--------------------------------------------------------------------------------
+Deleting AIP for: Meta Llama 4 Maverick
+AIP ARN: arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/v411rzqa9l99
+CLEANUP STATUS: SUCCESS
+
+
+============================================================================================================================================
+FINAL TEST RESULTS
+============================================================================================================================================
+Model                           Status         AIP AssetID           STS AssetID           AIP ARN
+--------------------------------------------------------------------------------------------------------------------------------------------
+Claude Sonnet 5                 SUCCESS        MSR06632-AIP          MSR99999-STS          arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/drqki9udvoww
+Claude Opus 5                   SUCCESS        MSR06632-AIP          MSR99999-STS          arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/5xt0r1c2ywf1
+Amazon Nova 2 Lite              SUCCESS        MSR06632-AIP          MSR99999-STS          arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/0n8hfm52tdq8
+Meta Llama 4 Maverick           SUCCESS        MSR06632-AIP          MSR99999-STS          arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/v411rzqa9l99
+
+
+========================================================================================================================
+AIP CLEANUP RESULTS
+========================================================================================================================
+Model                              Status         AIP ARN
+------------------------------------------------------------------------------------------------------------------------
+Claude Sonnet 5                    SUCCESS        arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/drqki9udvoww
+Claude Opus 5                      SUCCESS        arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/5xt0r1c2ywf1
+Amazon Nova 2 Lite                 SUCCESS        arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/0n8hfm52tdq8
+Meta Llama 4 Maverick              SUCCESS        arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/v411rzqa9l99
+
+
+====================================================================================================
+EXPECTED COST ATTRIBUTION
+====================================================================================================
+
+AIP / RESOURCE ATTRIBUTION
+resourceTags/ApplicationShortname = grh-aip
+resourceTags/AssetID = MSR06632-AIP
+
+STS / IAM PRINCIPAL ATTRIBUTION
+iamPrincipal/ApplicationShortname = grh-sts
+iamPrincipal/AssetID = MSR99999-STS
+
+CSV output:
+scenario1_aip_sts_mismatch_results.csv
+
+Scenario 1 execution complete
