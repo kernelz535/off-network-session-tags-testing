@@ -1,0 +1,120 @@
+sagemaker-user@default:~$ python3 scenario2.py 
+
+Current SageMaker Identity:
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/SageMaker
+
+Assuming SandboxServiceRole with session tags...
+
+Assumed STS Identity:
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/BedrockCostAttributionTest
+
+Expected STS Session Tags:
+ApplicationShortname = grh
+AssetID                 = MSR06632
+
+Actual tags can be validated through CloudTrail / CUR.
+
+================================================================================
+Testing : Claude Sonnet 5
+Model ID: us.anthropic.claude-sonnet-5
+================================================================================
+
+Model Response:
+# Granular Cost Attribution
+
+Granular cost attribution refers to the practice of tracking and allocating cloud or infrastructure costs at a fine-grained level—down to specific teams, projects, applications, environments, or even individual users—rather than viewing costs as a single aggregated bill. This is achieved by tagging resources with metadata (such as team name, project ID, or cost center) so that billing systems can group and filter usage data accordingly. Granular attribution enables organizations to identify which teams or workloads are driving spend, supports accurate chargeback/showback models, and helps pinpoint inefficiencies or unexpected cost spikes. Without this level of detail, organizations often struggle to hold teams accountable for their resource consumption or to make informed decisions about optimization and budgeting.
+
+# Using STS Session Tags for Cost Attribution
+
+AWS Security Token Service (STS) session tags allow you to attach key-value metadata to temporary credentials generated when a role is assumed (e.g., via `AssumeRole` or `AssumeRoleWithSAML`). These tags—such as `team=analytics`, `project=data-pipeline`, or `user=jane.doe`—propagate with the temporary session and can be enforced through IAM policies to require specific tags before access is granted. When resources are created or actions are performed during that session, AWS can log the session tags in CloudTrail, and in some cases, propagate them to the created resources themselves (especially when combined with resource tagging policies). This enables highly granular cost attribution in multi-tenant or shared-account environments,
+
+STATUS: SUCCESS
+
+================================================================================
+Testing : Claude Opus 5
+Model ID: us.anthropic.claude-opus-5
+================================================================================
+
+Model Response:
+## Granular cost attribution (4 sentences)
+
+Granular cost attribution is the practice of mapping cloud spend to the smallest meaningful unit of ownership — a team, tenant, feature, pipeline, or individual request — rather than to an account or service total. It typically relies on a tagging taxonomy (e.g., `cost-center`, `team`, `env`, `tenant-id`) applied consistently to resources, combined with billing data such as the AWS Cost and Usage Report where those tags are activated as cost allocation tags. For shared resources that can't be tagged per consumer — a multi-tenant database, an EKS cluster, a shared NAT gateway — attrib
+
+STATUS: SUCCESS
+
+================================================================================
+Testing : Claude Fable 5
+Model ID: us.anthropic.claude-fable-5
+================================================================================
+
+STATUS: FAILURE
+ERROR: An error occurred (ValidationException) when calling the Converse operation: The model returned the following errors: data retention mode 'default' is not available for this model
+
+================================================================================
+Testing : Amazon Nova 2 Lite
+Model ID: us.amazon.nova-2-lite-v1:0
+================================================================================
+
+Model Response:
+### Granular Cost Attribution in 4 Sentences
+
+1. **Definition**: Granular cost attribution is a financial methodology that assigns specific costs to individual business activities, products, or services with high precision, allowing companies to understand exactly where and how money is being spent.
+2. **Purpose**: The main goal is to improve decision-making by providing detailed insights into the cost drivers behind each unit of output, enabling businesses to identify inefficiencies, optimize resource allocation, and pricing strategies.
+3. **Implementation**: It involves tracking and categorizing costs at a very detailed level—such as per transaction, per user, or per service line—often using advanced data analytics, activity-based costing (ABC), and specialized software.
+4. **Impact**: By achieving a fine-grained view of costs, organizations can enhance profitability, tailor marketing efforts more effectively, and develop more accurate financial forecasts and budget allocations.
+
+### Using STS Session Tags for Granular Cost Attribution
+
+**STS (Session Tracking System) session tags** are metadata labels assigned to user sessions or transactions that provide context about the session’s nature, source, or specific business function. 
+
+These tags can be leveraged for granular cost attribution in the following way:
+
+1. **Tagging Specific Sessions**: By applying STS session tags—such as `campaign_id`, `user_type`, `product_category`, or `geographic_region`—to each user session, companies can categorize incoming traffic and transactions based on relevant business dimensions.
+   
+2. **Cost Allocation**: Once sessions are tagged, downstream systems (like billing, analytics, or cost-management platforms) can use these tags to allocate costs accordingly. For example, if a session is tagged with a specific marketing campaign ID, the associated marketing spend can be directly attributed to that campaign’s performance.
+
+3. **Performance Analysis**: With session tags in place, businesses can run detailed reports to see how much revenue, operational cost, or infrastructure expense is driven by each tagged dimension. This enables precise ROI calculations for campaigns, products, or user segments.
+
+4. **Optimization and Forecasting**: Armed with this granular, tag-based cost data, companies can optimize spending—shifting budgets toward high-performing campaigns or product lines—and improve financial forecasting accuracy by using real, tagged session data as a predictive input. 
+
+In essence, STS session tags act as powerful keys that unlock detailed cost-to-attribute mapping, driving smarter, data-driven financial decisions.
+
+STATUS: SUCCESS
+
+================================================================================
+Testing : Meta Llama 4 Maverick
+Model ID: us.meta.llama4-maverick-17b-instruct-v1:0
+================================================================================
+
+Model Response:
+Granular cost attribution is a method of allocating costs to specific resources, teams, or projects within an organization, allowing for more accurate financial tracking and management. It involves assigning costs to individual resources or activities based on their usage or consumption. STS session tags can be used to implement granular cost attribution by allowing users to pass key-value pairs as tags when assuming a role, which are then applied to the resources used during the session. These tags can be used to track costs associated with specific projects, teams, or applications, providing a more detailed understanding of resource utilization and costs.
+
+STATUS: SUCCESS
+
+================================================================================
+Testing : Mistral Large 3
+Model ID: mistral.mistral-large-3-675b-instruct
+================================================================================
+
+Model Response:
+**Granular Cost Attribution** breaks down cloud expenses into specific resources, teams, or projects to identify spending patterns and optimize budgets. It tracks costs at a detailed level—such as individual services, tags, or accounts—enabling precise financial accountability. Tools like AWS Cost Explorer or CloudHealth use filters to attribute costs to granular dimensions, reducing waste and improving cost efficiency. This approach helps organizations align spending with business priorities and detect anomalies.
+
+**STS Session Tags** are temporary metadata attached to AWS Security Token Service (STS) credentials (e.g., for IAM roles or federated users). They allow granular cost tracking by associating usage with specific sessions, teams, or workflows via tags like `Project=X`. When combined with AWS Cost Allocation Tags, these session tags enable detailed reporting (e.g., in Cost Explorer) to attribute costs to ephemeral workloads (e.g., CI/CD jobs). This is especially useful for multi-tenant environments where roles are shared but costs need to be segmented.
+
+STATUS: SUCCESS
+
+
+========================================================================================================================
+FINAL TEST RESULTS
+========================================================================================================================
+DateTime                           Code used                                                        Status         
+------------------------------------------------------------------------------------------------------------------------
+2026-09-03T17:46:04.225895+00:00   us.anthropic.claude-sonnet-5                                     SUCCESS        
+2026-09-03T17:46:11.312385+00:00   us.anthropic.claude-opus-5                                       SUCCESS        
+2026-09-03T17:46:19.257695+00:00   us.anthropic.claude-fable-5                                      FAILURE        
+2026-09-03T17:46:19.533269+00:00   us.amazon.nova-2-lite-v1:0                                       SUCCESS        
+2026-09-03T17:46:23.029651+00:00   us.meta.llama4-maverick-17b-instruct-v1:0                        SUCCESS        
+2026-09-03T17:46:23.835074+00:00   mistral.mistral-large-3-675b-instruct                            SUCCESS        
+========================================================================================================================
+
+Results saved to: bedrock_model_test_results.csv
