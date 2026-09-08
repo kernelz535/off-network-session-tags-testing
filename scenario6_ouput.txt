@@ -1,0 +1,344 @@
+sagemaker-user@default:~$ python3 scenario6.py 
+
+
+==============================================================================================================
+SCENARIO 6
+MULTIPLE APPLICATIONS + MULTIPLE MODELS - SAME IAM ROLE
+==============================================================================================================
+
+SAME IAM ROLE USED BY ALL APPLICATIONS:
+arn:aws:iam::196856463470:role/SandboxServiceRole
+
+APPLICATIONS:
+  Application-A: app-alpha / MSR06632
+  Application-B: app-beta / MSR07777
+  Application-C: app-gamma / MSR08888
+
+MODELS:
+  Claude Sonnet 5: us.anthropic.claude-sonnet-5
+  Claude Opus 5: us.anthropic.claude-opus-5
+  Amazon Nova 2 Lite: us.amazon.nova-2-lite-v1:0
+  Meta Llama 4 Maverick: us.meta.llama4-maverick-17b-instruct-v1:0
+
+====================================================================================================
+ORIGINAL SAGEMAKER IDENTITY
+====================================================================================================
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/SageMaker
+
+====================================================================================================
+CREATING STS SESSION: Application-A
+====================================================================================================
+IAM Role             = arn:aws:iam::196856463470:role/SandboxServiceRole
+RoleSessionName      = Scenario6-Application-A
+ApplicationShortname = app-alpha
+AssetID              = MSR06632
+
+Assumed Identity:
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario6-Application-A
+
+Expected Session Tags:
+ApplicationShortname = app-alpha
+AssetID              = MSR06632
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-A
+MODEL       : Claude Sonnet 5
+MODEL ID    : us.anthropic.claude-sonnet-5
+----------------------------------------------------------------------------------------------------
+
+Response:
+Amazon Bedrock costs can be attributed by tagging resources such as provisioned throughput, custom models, and agents with cost allocation tags (e.g., by project, team, or application), which then feed into AWS Cost Explorer and Cost and Usage Reports for granular tracking. For on-demand model invocations, attribution is achieved primarily through request metadata, application-level logging, and CloudWatch/CloudTrail integration since usage-based charges are tied to API calls rather than persistent taggable resources, making custom instrumentation important for chargeback or showback reporting.
+
+Request ID: aab98691-0d83-4066-a2c4-664f7f48ddcd
+
+Token Usage:
+Input  = 29
+Output = 190
+Total  = 219
+
+STATUS: SUCCESS
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-A
+MODEL       : Claude Opus 5
+MODEL ID    : us.anthropic.claude-opus-5
+----------------------------------------------------------------------------------------------------
+
+Response:
+
+
+Request ID: 617fceff-a4ba-42e4-bde6-c83dc1de18b2
+
+Token Usage:
+Input  = 29
+Output = 256
+Total  = 285
+
+STATUS: SUCCESS
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-A
+MODEL       : Amazon Nova 2 Lite
+MODEL ID    : us.amazon.nova-2-lite-v1:0
+----------------------------------------------------------------------------------------------------
+
+Response:
+Amazon Bedrock cost attribution enables users to track and allocate expenses associated with on-demand usage of foundation models and managed inference through tags, which are applied to resources or API requests. This allows organizations to monitor costs at a granular level, such as by project, department, or specific model usage, and generate detailed cost reports for better financial transparency and decision-making.
+
+Request ID: ae3e6590-d328-4ac7-8100-ef8ab3861f02
+
+Token Usage:
+Input  = 56
+Output = 74
+Total  = 130
+
+STATUS: SUCCESS
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-A
+MODEL       : Meta Llama 4 Maverick
+MODEL ID    : us.meta.llama4-maverick-17b-instruct-v1:0
+----------------------------------------------------------------------------------------------------
+
+Response:
+Amazon Bedrock cost attribution refers to the process of tracking and allocating the costs associated with using the Bedrock service, including model inference, customization, and knowledge base costs, to specific users, teams, or applications. By using tags and cost allocation features, users can gain visibility into their Bedrock expenses and attribute costs to specific resources or projects, enabling better cost management and optimization.
+
+Request ID: 171ee912-7889-474c-b583-1f2900f4bfd6
+
+Token Usage:
+Input  = 45
+Output = 77
+Total  = 122
+
+STATUS: SUCCESS
+
+====================================================================================================
+CREATING STS SESSION: Application-B
+====================================================================================================
+IAM Role             = arn:aws:iam::196856463470:role/SandboxServiceRole
+RoleSessionName      = Scenario6-Application-B
+ApplicationShortname = app-beta
+AssetID              = MSR07777
+
+Assumed Identity:
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario6-Application-B
+
+Expected Session Tags:
+ApplicationShortname = app-beta
+AssetID              = MSR07777
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-B
+MODEL       : Claude Sonnet 5
+MODEL ID    : us.anthropic.claude-sonnet-5
+----------------------------------------------------------------------------------------------------
+
+Response:
+Amazon Bedrock cost attribution refers to the practice of tracking and allocating the costs incurred from using foundation models—such as inference calls, token usage, provisioned throughput, and fine-tuning—to specific teams, projects, or applications, typically using AWS cost allocation tags, Cost Explorer, and detailed billing reports. This enables organizations to monitor spending patterns across different use cases, enforce budgets, and accurately charge back or show back AI-related expenses to the appropriate business units.
+
+Request ID: ab2ac680-037f-43a9-acd1-b8ace64549e1
+
+Token Usage:
+Input  = 29
+Output = 168
+Total  = 197
+
+STATUS: SUCCESS
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-B
+MODEL       : Claude Opus 5
+MODEL ID    : us.anthropic.claude-opus-5
+----------------------------------------------------------------------------------------------------
+
+Response:
+
+
+Request ID: ed2bb6f7-69b1-4e2f-a4b9-ee889f53552a
+
+Token Usage:
+Input  = 29
+Output = 256
+Total  = 285
+
+STATUS: SUCCESS
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-B
+MODEL       : Amazon Nova 2 Lite
+MODEL ID    : us.amazon.nova-2-lite-v1:0
+----------------------------------------------------------------------------------------------------
+
+Response:
+Amazon Bedrock cost attribution allows users to track and allocate expenses associated with on-demand usage and Provisioned Throughput for LLM inference and token usage through tags. This helps organizations monitor costs, optimize spending, and accurately assign charges to specific projects, departments, or accounts by leveraging AWS’s tagging and cost allocation features.
+
+Request ID: dd452d1e-f955-4c8c-a793-91f5ed961997
+
+Token Usage:
+Input  = 56
+Output = 65
+Total  = 121
+
+STATUS: SUCCESS
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-B
+MODEL       : Meta Llama 4 Maverick
+MODEL ID    : us.meta.llama4-maverick-17b-instruct-v1:0
+----------------------------------------------------------------------------------------------------
+
+Response:
+Amazon Bedrock cost attribution refers to the ability to track and allocate costs associated with using the Bedrock service, such as model inference and customization, to specific resources or departments within an organization. By using tags and other cost allocation methods, users can gain visibility into their Bedrock expenses and attribute them to specific projects, teams, or applications, enabling more accurate cost management and optimization.
+
+Request ID: 520dbf6d-e122-4b45-91ab-ef7b55dc39ba
+
+Token Usage:
+Input  = 45
+Output = 77
+Total  = 122
+
+STATUS: SUCCESS
+
+====================================================================================================
+CREATING STS SESSION: Application-C
+====================================================================================================
+IAM Role             = arn:aws:iam::196856463470:role/SandboxServiceRole
+RoleSessionName      = Scenario6-Application-C
+ApplicationShortname = app-gamma
+AssetID              = MSR08888
+
+Assumed Identity:
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario6-Application-C
+
+Expected Session Tags:
+ApplicationShortname = app-gamma
+AssetID              = MSR08888
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-C
+MODEL       : Claude Sonnet 5
+MODEL ID    : us.anthropic.claude-sonnet-5
+----------------------------------------------------------------------------------------------------
+
+Response:
+Amazon Bedrock cost attribution involves tracking and allocating charges for foundation model usage (inference, fine-tuning, and provisioning) across teams, projects, or applications, typically using tools like AWS Cost Explorer, Cost and Usage Reports, and resource tagging to identify who's consuming which models and how much. Since Bedrock charges are usage-based (per token, per hour for provisioned throughput, etc.), organizations often implement tagging strategies on API calls, IAM roles, or applications, along with custom logging of model invocations, to accurately attribute costs to specific business units or use cases for budgeting and chargeback purposes.
+
+Request ID: 87e497ed-f45f-41ee-b4a6-94074b5357a7
+
+Token Usage:
+Input  = 29
+Output = 215
+Total  = 244
+
+STATUS: SUCCESS
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-C
+MODEL       : Claude Opus 5
+MODEL ID    : us.anthropic.claude-opus-5
+----------------------------------------------------------------------------------------------------
+
+Response:
+Amazon Bedrock charges are usage-based — primarily input/output tokens
+
+Request ID: 5f24d882-09b7-49fe-a2a8-b88381c0e841
+
+Token Usage:
+Input  = 29
+Output = 256
+Total  = 285
+
+STATUS: SUCCESS
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-C
+MODEL       : Amazon Nova 2 Lite
+MODEL ID    : us.amazon.nova-2-lite-v1:0
+----------------------------------------------------------------------------------------------------
+
+Response:
+Amazon Bedrock cost attribution allows users to track and allocate expenses associated with on-demand usage of foundation models and agents through integrated tools such as AWS Cost Explorer, offering granular visibility into model-specific usage and costs. This functionality enables organizations to monitor their AI/ML spending, optimize resource usage, and ensure transparent billing by breaking down costs based on individual models, inference units, and usage patterns.
+
+Request ID: ec45f593-a024-454c-baa5-5f925296ed25
+
+Token Usage:
+Input  = 56
+Output = 79
+Total  = 135
+
+STATUS: SUCCESS
+
+----------------------------------------------------------------------------------------------------
+APPLICATION : Application-C
+MODEL       : Meta Llama 4 Maverick
+MODEL ID    : us.meta.llama4-maverick-17b-instruct-v1:0
+----------------------------------------------------------------------------------------------------
+
+Response:
+Amazon Bedrock cost attribution refers to the ability to track and allocate costs associated with using the Bedrock service, such as model inference and customization, to specific projects, teams, or departments within an organization. This is achieved through the use of tags, which allow users to categorize and track their Bedrock usage and costs, providing a clear understanding of where their costs are being incurred.
+
+Request ID: 7760c048-925b-405a-ac66-3a9bb287f2b4
+
+Token Usage:
+Input  = 45
+Output = 77
+Total  = 122
+
+STATUS: SUCCESS
+
+
+======================================================================================================================================================
+SCENARIO 6 FINAL RESULTS
+======================================================================================================================================================
+Application       AppShortname        AssetID         Model                         Status      Request ID
+------------------------------------------------------------------------------------------------------------------------------------------------------
+Application-A     app-alpha           MSR06632        Claude Sonnet 5               SUCCESS     aab98691-0d83-4066-a2c4-664f7f48ddcd
+Application-A     app-alpha           MSR06632        Claude Opus 5                 SUCCESS     617fceff-a4ba-42e4-bde6-c83dc1de18b2
+Application-A     app-alpha           MSR06632        Amazon Nova 2 Lite            SUCCESS     ae3e6590-d328-4ac7-8100-ef8ab3861f02
+Application-A     app-alpha           MSR06632        Meta Llama 4 Maverick         SUCCESS     171ee912-7889-474c-b583-1f2900f4bfd6
+Application-B     app-beta            MSR07777        Claude Sonnet 5               SUCCESS     ab2ac680-037f-43a9-acd1-b8ace64549e1
+Application-B     app-beta            MSR07777        Claude Opus 5                 SUCCESS     ed2bb6f7-69b1-4e2f-a4b9-ee889f53552a
+Application-B     app-beta            MSR07777        Amazon Nova 2 Lite            SUCCESS     dd452d1e-f955-4c8c-a793-91f5ed961997
+Application-B     app-beta            MSR07777        Meta Llama 4 Maverick         SUCCESS     520dbf6d-e122-4b45-91ab-ef7b55dc39ba
+Application-C     app-gamma           MSR08888        Claude Sonnet 5               SUCCESS     87e497ed-f45f-41ee-b4a6-94074b5357a7
+Application-C     app-gamma           MSR08888        Claude Opus 5                 SUCCESS     5f24d882-09b7-49fe-a2a8-b88381c0e841
+Application-C     app-gamma           MSR08888        Amazon Nova 2 Lite            SUCCESS     ec45f593-a024-454c-baa5-5f925296ed25
+Application-C     app-gamma           MSR08888        Meta Llama 4 Maverick         SUCCESS     7760c048-925b-405a-ac66-3a9bb287f2b4
+
+
+==============================================================================================================
+EXPECTED CUR ATTRIBUTION
+==============================================================================================================
+
+Application-A
+iamPrincipal/ApplicationShortname = app-alpha
+iamPrincipal/AssetID              = MSR06632
+Expected across models:
+  - Claude Sonnet 5
+  - Claude Opus 5
+  - Amazon Nova 2 Lite
+  - Meta Llama 4 Maverick
+
+Application-B
+iamPrincipal/ApplicationShortname = app-beta
+iamPrincipal/AssetID              = MSR07777
+Expected across models:
+  - Claude Sonnet 5
+  - Claude Opus 5
+  - Amazon Nova 2 Lite
+  - Meta Llama 4 Maverick
+
+Application-C
+iamPrincipal/ApplicationShortname = app-gamma
+iamPrincipal/AssetID              = MSR08888
+Expected across models:
+  - Claude Sonnet 5
+  - Claude Opus 5
+  - Amazon Nova 2 Lite
+  - Meta Llama 4 Maverick
+
+Same IAM Role for every invocation:
+arn:aws:iam::196856463470:role/SandboxServiceRole
+
+CSV output:
+scenario6_multiple_apps_multiple_models.csv
