@@ -1,0 +1,343 @@
+sagemaker-user@default:~$ python3 scenario3_chat_embedding.py 
+
+
+========================================================================================================================
+SCENARIO 3
+DIRECT / IN-REGION vs US CRIS vs GLOBAL CRIS + STS
+========================================================================================================================
+
+NO CUSTOMER APPLICATION INFERENCE PROFILE IS CREATED.
+
+NO CLEANUP IS REQUIRED.
+
+STS COST ATTRIBUTION:
+ApplicationShortname = grh-cris-sts
+AssetID              = MSR06632-CRIS
+
+==============================================================================================================
+ORIGINAL AWS IDENTITY
+==============================================================================================================
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/SageMaker
+
+==============================================================================================================
+ASSUMING ROLE WITH STS SESSION TAGS
+==============================================================================================================
+Role                  = arn:aws:iam::196856463470:role/SandboxServiceRole
+ApplicationShortname  = grh-cris-sts
+AssetID               = MSR06632-CRIS
+
+==============================================================================================================
+TAGGED STS IDENTITY
+==============================================================================================================
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario3DirectCRISSTS
+
+Expected Session Tags:
+ApplicationShortname = grh-cris-sts
+AssetID              = MSR06632-CRIS
+
+==============================================================================================================
+MODEL      : Claude Sonnet 5
+MODEL TYPE : CHAT
+MODE       : DIRECT
+MODEL ID   : anthropic.claude-sonnet-5
+==============================================================================================================
+
+STATUS: FAILURE
+An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID anthropic.claude-sonnet-5 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+
+Looking up AWS-provided Inference Profile...
+Profile Name : US Anthropic Claude Sonnet 5
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.anthropic.claude-sonnet-5
+Profile Type : SYSTEM_DEFINED
+Possible Destination Regions:
+  - us-east-1
+  - us-east-2
+  - us-west-2
+
+==============================================================================================================
+MODEL      : Claude Sonnet 5
+MODEL TYPE : CHAT
+MODE       : US_CRIS
+MODEL ID   : us.anthropic.claude-sonnet-5
+==============================================================================================================
+
+CHAT RESPONSE:
+Amazon Bedrock cost attribution works by tagging resources (such as provisioned throughput, custom models, or agents) and tracking usage through AWS Cost Explorer and Cost and Usage Reports, allowing organizations to break down expenses by model invocations, input/output tokens, and provisioned capacity across different teams, projects, or applications. Since Bedrock is a pay-per-use service by default (with optional provisioned throughput for consistent workloads), cost attribution typically combines AWS tagging strategies with detailed usage metrics—like tokens processed per API call—to allocate charges accurately at a granular level, often requiring custom dashboards or integration with tools like AWS Budgets for full visibility.
+
+STATUS: SUCCESS
+Request ID: 71f8fa39-04db-4304-bb14-11ef01d58893
+
+Looking up AWS-provided Inference Profile...
+Profile Name : Global Anthropic Claude Sonnet 5
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/global.anthropic.claude-sonnet-5
+Profile Type : SYSTEM_DEFINED
+Possible Destination Regions:
+  - us-east-1
+
+==============================================================================================================
+MODEL      : Claude Sonnet 5
+MODEL TYPE : CHAT
+MODE       : GLOBAL_CRIS
+MODEL ID   : global.anthropic.claude-sonnet-5
+==============================================================================================================
+
+STATUS: FAILURE
+An error occurred (AccessDeniedException) when calling the Converse operation: User: arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario3DirectCRISSTS is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:::foundation-model/anthropic.claude-sonnet-5 with an explicit deny in a service control policy: arn:aws:organizations::691319007355:policy/o-oezy0dd9gc/service_control_policy/p-4i5rkk5u
+
+==============================================================================================================
+MODEL      : Claude Opus 5
+MODEL TYPE : CHAT
+MODE       : DIRECT
+MODEL ID   : anthropic.claude-opus-5
+==============================================================================================================
+
+STATUS: FAILURE
+An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID anthropic.claude-opus-5 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+
+Looking up AWS-provided Inference Profile...
+Profile Name : US Anthropic Claude Opus 5
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.anthropic.claude-opus-5
+Profile Type : SYSTEM_DEFINED
+Possible Destination Regions:
+  - us-east-1
+  - us-east-2
+  - us-west-2
+
+==============================================================================================================
+MODEL      : Claude Opus 5
+MODEL TYPE : CHAT
+MODE       : US_CRIS
+MODEL ID   : us.anthropic.claude-opus-5
+==============================================================================================================
+
+CHAT RESPONSE:
+Amazon Bedrock costs are billed per-usage (input/output tokens for on-demand invocation, h
+
+STATUS: SUCCESS
+Request ID: 534761f8-d309-4e32-b5d0-e3c6f7aa4b90
+
+Looking up AWS-provided Inference Profile...
+Profile Name : Global Anthropic Claude Opus 5
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/global.anthropic.claude-opus-5
+Profile Type : SYSTEM_DEFINED
+Possible Destination Regions:
+  - us-east-1
+
+==============================================================================================================
+MODEL      : Claude Opus 5
+MODEL TYPE : CHAT
+MODE       : GLOBAL_CRIS
+MODEL ID   : global.anthropic.claude-opus-5
+==============================================================================================================
+
+STATUS: FAILURE
+An error occurred (AccessDeniedException) when calling the Converse operation: User: arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario3DirectCRISSTS is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:::foundation-model/anthropic.claude-opus-5 with an explicit deny in a service control policy: arn:aws:organizations::691319007355:policy/o-oezy0dd9gc/service_control_policy/p-4i5rkk5u
+
+==============================================================================================================
+MODEL      : Amazon Nova 2 Lite
+MODEL TYPE : CHAT
+MODE       : DIRECT
+MODEL ID   : amazon.nova-2-lite-v1:0
+==============================================================================================================
+
+STATUS: FAILURE
+An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID amazon.nova-2-lite-v1:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+
+Looking up AWS-provided Inference Profile...
+Profile Name : US Amazon Nova 2 Lite
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.amazon.nova-2-lite-v1:0
+Profile Type : SYSTEM_DEFINED
+Possible Destination Regions:
+  - us-east-1
+  - us-east-2
+  - us-west-2
+
+==============================================================================================================
+MODEL      : Amazon Nova 2 Lite
+MODEL TYPE : CHAT
+MODE       : US_CRIS
+MODEL ID   : us.amazon.nova-2-lite-v1:0
+==============================================================================================================
+
+CHAT RESPONSE:
+**Amazon Bedrock** allocates costs based on **usage metrics** such as the number of **tokens processed** (input and output) for each API request, and these costs are **attributed to the AWS account and specific service usage** (e.g., model invocations, storage, or management operations) either through **AWS Cost Explorer**, **Billing Console**, or **programmatic APIs**, allowing you to track and manage expenses per application, user, or department. This granular attribution helps organizations monitor and optimize their generative AI spending efficiently.
+
+STATUS: SUCCESS
+Request ID: 82f23ae1-0c5a-4736-bbeb-495d4a581dbe
+
+Looking up AWS-provided Inference Profile...
+Profile Name : GLOBAL Amazon Nova 2 Lite
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/global.amazon.nova-2-lite-v1:0
+Profile Type : SYSTEM_DEFINED
+Possible Destination Regions:
+  - us-east-1
+
+==============================================================================================================
+MODEL      : Amazon Nova 2 Lite
+MODEL TYPE : CHAT
+MODE       : GLOBAL_CRIS
+MODEL ID   : global.amazon.nova-2-lite-v1:0
+==============================================================================================================
+
+STATUS: FAILURE
+An error occurred (AccessDeniedException) when calling the Converse operation: User: arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario3DirectCRISSTS is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:::foundation-model/amazon.nova-2-lite-v1:0 with an explicit deny in a service control policy: arn:aws:organizations::691319007355:policy/o-oezy0dd9gc/service_control_policy/p-4i5rkk5u
+
+==============================================================================================================
+MODEL      : Meta Llama 4 Maverick
+MODEL TYPE : CHAT
+MODE       : DIRECT
+MODEL ID   : meta.llama4-maverick-17b-instruct-v1:0
+==============================================================================================================
+
+STATUS: FAILURE
+An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID meta.llama4-maverick-17b-instruct-v1:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+
+Looking up AWS-provided Inference Profile...
+Profile Name : US Llama 4 Maverick 17B Instruct
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.meta.llama4-maverick-17b-instruct-v1:0
+Profile Type : SYSTEM_DEFINED
+Possible Destination Regions:
+  - us-east-1
+  - us-east-2
+  - us-west-2
+
+==============================================================================================================
+MODEL      : Meta Llama 4 Maverick
+MODEL TYPE : CHAT
+MODE       : US_CRIS
+MODEL ID   : us.meta.llama4-maverick-17b-instruct-v1:0
+==============================================================================================================
+
+CHAT RESPONSE:
+Amazon Bedrock cost attribution allows users to track and allocate costs associated with the usage of foundation models and other Bedrock features to specific projects, departments, or teams within their organization. This is achieved through the use of tags, which enable users to categorize and filter costs, providing a clear understanding of Bedrock-related expenses.
+
+STATUS: SUCCESS
+Request ID: fce69315-7ed6-4547-9c14-d9bb6fb2a35d
+
+--------------------------------------------------------------------------------------------------------------
+SKIPPING: Meta Llama 4 Maverick / GLOBAL_CRIS
+No configured AWS model/profile ID for this invocation mode.
+--------------------------------------------------------------------------------------------------------------
+
+==============================================================================================================
+MODEL      : Amazon Titan Text Embeddings V2
+MODEL TYPE : TITAN_EMBED
+MODE       : DIRECT
+MODEL ID   : amazon.titan-embed-text-v2:0
+==============================================================================================================
+
+TITAN EMBEDDING SUCCESS
+Embedding dimensions = 1024
+Input tokens         = 16
+
+STATUS: SUCCESS
+Request ID: 5d002848-ccc9-4a51-a563-461d5a3bd108
+
+--------------------------------------------------------------------------------------------------------------
+SKIPPING: Amazon Titan Text Embeddings V2 / US_CRIS
+No configured AWS model/profile ID for this invocation mode.
+--------------------------------------------------------------------------------------------------------------
+
+--------------------------------------------------------------------------------------------------------------
+SKIPPING: Amazon Titan Text Embeddings V2 / GLOBAL_CRIS
+No configured AWS model/profile ID for this invocation mode.
+--------------------------------------------------------------------------------------------------------------
+
+==============================================================================================================
+MODEL      : Cohere Embed v4
+MODEL TYPE : COHERE_EMBED
+MODE       : DIRECT
+MODEL ID   : cohere.embed-v4:0
+==============================================================================================================
+
+COHERE EMBEDDING SUCCESS
+Embedding dimensions = 1536
+
+STATUS: SUCCESS
+Request ID: 141c6563-65a0-446f-945d-290809cba02e
+
+Looking up AWS-provided Inference Profile...
+Profile Name : US Cohere Embed v4
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.cohere.embed-v4:0
+Profile Type : SYSTEM_DEFINED
+Possible Destination Regions:
+  - us-east-1
+  - us-east-2
+  - us-west-2
+
+==============================================================================================================
+MODEL      : Cohere Embed v4
+MODEL TYPE : COHERE_EMBED
+MODE       : US_CRIS
+MODEL ID   : us.cohere.embed-v4:0
+==============================================================================================================
+
+COHERE EMBEDDING SUCCESS
+Embedding dimensions = 1536
+
+STATUS: SUCCESS
+Request ID: 60dd398e-d16f-4434-b9a9-1dcc015faca2
+
+Looking up AWS-provided Inference Profile...
+Profile Name : Global Cohere Embed v4
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/global.cohere.embed-v4:0
+Profile Type : SYSTEM_DEFINED
+Possible Destination Regions:
+  - us-east-1
+
+==============================================================================================================
+MODEL      : Cohere Embed v4
+MODEL TYPE : COHERE_EMBED
+MODE       : GLOBAL_CRIS
+MODEL ID   : global.cohere.embed-v4:0
+==============================================================================================================
+
+STATUS: FAILURE
+An error occurred (AccessDeniedException) when calling the InvokeModel operation: User: arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario3DirectCRISSTS is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:::foundation-model/cohere.embed-v4:0 with an explicit deny in a service control policy: arn:aws:organizations::691319007355:policy/o-oezy0dd9gc/service_control_policy/p-4i5rkk5u
+
+
+================================================================================================================================================================
+SCENARIO 3 FINAL RESULTS
+================================================================================================================================================================
+Model                             Type           Mode           Expected   Status      Validation            Request ID
+----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Claude Sonnet 5                   CHAT           DIRECT         False      FAILURE     EXPECTED_FAILURE      
+Claude Sonnet 5                   CHAT           US_CRIS        True       SUCCESS     PASS                  71f8fa39-04db-4304-bb14-11ef01d58893
+Claude Sonnet 5                   CHAT           GLOBAL_CRIS    True       FAILURE     UNEXPECTED_FAILURE    
+Claude Opus 5                     CHAT           DIRECT         False      FAILURE     EXPECTED_FAILURE      
+Claude Opus 5                     CHAT           US_CRIS        True       SUCCESS     PASS                  534761f8-d309-4e32-b5d0-e3c6f7aa4b90
+Claude Opus 5                     CHAT           GLOBAL_CRIS    True       FAILURE     UNEXPECTED_FAILURE    
+Amazon Nova 2 Lite                CHAT           DIRECT         True       FAILURE     UNEXPECTED_FAILURE    
+Amazon Nova 2 Lite                CHAT           US_CRIS        True       SUCCESS     PASS                  82f23ae1-0c5a-4736-bbeb-495d4a581dbe
+Amazon Nova 2 Lite                CHAT           GLOBAL_CRIS    True       FAILURE     UNEXPECTED_FAILURE    
+Meta Llama 4 Maverick             CHAT           DIRECT         False      FAILURE     EXPECTED_FAILURE      
+Meta Llama 4 Maverick             CHAT           US_CRIS        True       SUCCESS     PASS                  fce69315-7ed6-4547-9c14-d9bb6fb2a35d
+Amazon Titan Text Embeddings V2   TITAN_EMBED    DIRECT         True       SUCCESS     PASS                  5d002848-ccc9-4a51-a563-461d5a3bd108
+Cohere Embed v4                   COHERE_EMBED   DIRECT         True       SUCCESS     PASS                  141c6563-65a0-446f-945d-290809cba02e
+Cohere Embed v4                   COHERE_EMBED   US_CRIS        True       SUCCESS     PASS                  60dd398e-d16f-4434-b9a9-1dcc015faca2
+Cohere Embed v4                   COHERE_EMBED   GLOBAL_CRIS    True       FAILURE     UNEXPECTED_FAILURE    
+
+
+========================================================================================================================
+EXPECTED CUR / COST ATTRIBUTION
+========================================================================================================================
+
+All successful invocations should remain attributable to:
+
+iamPrincipal/ApplicationShortname = grh-cris-sts
+iamPrincipal/AssetID = MSR06632-CRIS
+
+This should apply across:
+  - Direct / In-Region inference
+  - US Geographic CRIS
+  - Global CRIS
+  - Generative models
+  - Embedding models
+
+No customer AIP resource tags are expected.
+
+For CRIS requests, use the Request ID in CloudTrail and inspect:
+additionalEventData.inferenceRegion
+
+CSV output:
+scenario3_direct_us_global_all_models.csv
