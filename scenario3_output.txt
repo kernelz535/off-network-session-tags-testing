@@ -1,0 +1,302 @@
+
+==============================================================================================================
+SCENARIO 3
+DIRECT MODEL vs US CRIS vs GLOBAL CRIS + STS
+==============================================================================================================
+
+NO CUSTOMER APPLICATION INFERENCE PROFILE WILL BE CREATED.
+
+STS ATTRIBUTION:
+ApplicationShortname = grh-cris-sts
+AssetID              = MSR06632-CRIS
+
+==========================================================================================
+CURRENT SAGEMAKER IDENTITY
+==========================================================================================
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/SageMaker
+
+==========================================================================================
+ASSUMING ROLE WITH STS SESSION TAGS
+==========================================================================================
+ApplicationShortname = grh-cris-sts
+AssetID              = MSR06632-CRIS
+
+==========================================================================================
+TAGGED ASSUMED IDENTITY
+==========================================================================================
+arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario3CRISSTS
+
+Expected STS session tags:
+ApplicationShortname = grh-cris-sts
+AssetID              = MSR06632-CRIS
+
+====================================================================================================
+MODEL : Claude Sonnet 5
+MODE  : DIRECT
+ID    : anthropic.claude-sonnet-5
+AWS documented support expected: False
+====================================================================================================
+
+STATUS: FAILURE
+ERROR: An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID anthropic.claude-sonnet-5 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+
+Looking up AWS inference profile...
+Profile Name : US Anthropic Claude Sonnet 5
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.anthropic.claude-sonnet-5
+Profile Type : SYSTEM_DEFINED
+Destinations:
+  - arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5
+  - arn:aws:bedrock:us-east-2::foundation-model/anthropic.claude-sonnet-5
+  - arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-sonnet-5
+
+====================================================================================================
+MODEL : Claude Sonnet 5
+MODE  : US_CRIS
+ID    : us.anthropic.claude-sonnet-5
+AWS documented support expected: True
+====================================================================================================
+
+MODEL RESPONSE:
+Amazon Bedrock cross-region inference is a feature that allows you to route model inference requests to AWS regions beyond the one you're operating in, helping to manage traffic spikes and improve availability during periods of high demand. It works by automatically selecting an optimal AWS region within the same geographic area to process your inference request, using available compute capacity across multiple regions without requiring you to manually predict demand fluctuations. This capability is accessed through inference profiles (rather than direct model IDs) and helps achieve higher throughput, better resilience, and more consistent performance while maintaining the same pricing as standard on-demand inference, with data remaining within the AWS regions that make up the geographic area.
+
+Request ID:
+7678086d-6487-4e12-b7a3-8123c5725093
+
+Token Usage:
+Input  = 30
+Output = 224
+Total  = 254
+
+STATUS: SUCCESS
+
+Looking up AWS inference profile...
+Profile Name : Global Anthropic Claude Sonnet 5
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/global.anthropic.claude-sonnet-5
+Profile Type : SYSTEM_DEFINED
+Destinations:
+  - arn:aws:bedrock:::foundation-model/anthropic.claude-sonnet-5
+  - arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-sonnet-5
+
+====================================================================================================
+MODEL : Claude Sonnet 5
+MODE  : GLOBAL_CRIS
+ID    : global.anthropic.claude-sonnet-5
+AWS documented support expected: True
+====================================================================================================
+
+STATUS: FAILURE
+ERROR: An error occurred (AccessDeniedException) when calling the Converse operation: User: arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario3CRISSTS is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:::foundation-model/anthropic.claude-sonnet-5 with an explicit deny in a service control policy: arn:aws:organizations::691319007355:policy/o-oezy0dd9gc/service_control_policy/p-4i5rkk5u
+
+====================================================================================================
+MODEL : Claude Opus 5
+MODE  : DIRECT
+ID    : anthropic.claude-opus-5
+AWS documented support expected: False
+====================================================================================================
+
+STATUS: FAILURE
+ERROR: An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID anthropic.claude-opus-5 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+
+Looking up AWS inference profile...
+Profile Name : US Anthropic Claude Opus 5
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.anthropic.claude-opus-5
+Profile Type : SYSTEM_DEFINED
+Destinations:
+  - arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-opus-5
+  - arn:aws:bedrock:us-east-2::foundation-model/anthropic.claude-opus-5
+  - arn:aws:bedrock:us-west-2::foundation-model/anthropic.claude-opus-5
+
+====================================================================================================
+MODEL : Claude Opus 5
+MODE  : US_CRIS
+ID    : us.anthropic.claude-opus-5
+AWS documented support expected: True
+====================================================================================================
+
+MODEL RESPONSE:
+
+
+Request ID:
+024761bf-de7a-4f5d-9fe3-5a9245c5be4d
+
+Token Usage:
+Input  = 30
+Output = 256
+Total  = 286
+
+STATUS: SUCCESS
+
+Looking up AWS inference profile...
+Profile Name : Global Anthropic Claude Opus 5
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/global.anthropic.claude-opus-5
+Profile Type : SYSTEM_DEFINED
+Destinations:
+  - arn:aws:bedrock:::foundation-model/anthropic.claude-opus-5
+  - arn:aws:bedrock:us-east-1::foundation-model/anthropic.claude-opus-5
+
+====================================================================================================
+MODEL : Claude Opus 5
+MODE  : GLOBAL_CRIS
+ID    : global.anthropic.claude-opus-5
+AWS documented support expected: True
+====================================================================================================
+
+STATUS: FAILURE
+ERROR: An error occurred (AccessDeniedException) when calling the Converse operation: User: arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario3CRISSTS is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:::foundation-model/anthropic.claude-opus-5 with an explicit deny in a service control policy: arn:aws:organizations::691319007355:policy/o-oezy0dd9gc/service_control_policy/p-4i5rkk5u
+
+====================================================================================================
+MODEL : Amazon Nova 2 Lite
+MODE  : DIRECT
+ID    : amazon.nova-2-lite-v1:0
+AWS documented support expected: True
+====================================================================================================
+
+STATUS: FAILURE
+ERROR: An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID amazon.nova-2-lite-v1:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+
+Looking up AWS inference profile...
+Profile Name : US Amazon Nova 2 Lite
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.amazon.nova-2-lite-v1:0
+Profile Type : SYSTEM_DEFINED
+Destinations:
+  - arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-2-lite-v1:0
+  - arn:aws:bedrock:us-east-2::foundation-model/amazon.nova-2-lite-v1:0
+  - arn:aws:bedrock:us-west-2::foundation-model/amazon.nova-2-lite-v1:0
+
+====================================================================================================
+MODEL : Amazon Nova 2 Lite
+MODE  : US_CRIS
+ID    : us.amazon.nova-2-lite-v1:0
+AWS documented support expected: True
+====================================================================================================
+
+MODEL RESPONSE:
+### Amazon Bedrock Cross-Region Inference (in 3 Sentences)
+
+**Amazon Bedrock cross-region inference** enables you to invoke large language models (LLMs) and other foundation models hosted in one AWS region from applications or code running in a different AWS region, allowing for lower latency and better performance by choosing a region closer to your users.  
+This feature supports secure, low-latency access to models such as those from AI21 Labs, Anthropic, Meta, Mistral AI, and Amazon’s own Titan models, while automatically handling data transfer and encryption across regions.  
+It simplifies deployment and scalability by letting you separate compute resources from model hosting, reducing the need to replicate models across multiple regions and enabling more flexible and efficient application architectures.
+
+Request ID:
+0e2bbc3f-3642-428b-957b-553c9347ba9b
+
+Token Usage:
+Input  = 57
+Output = 152
+Total  = 209
+
+STATUS: SUCCESS
+
+Looking up AWS inference profile...
+Profile Name : GLOBAL Amazon Nova 2 Lite
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/global.amazon.nova-2-lite-v1:0
+Profile Type : SYSTEM_DEFINED
+Destinations:
+  - arn:aws:bedrock:::foundation-model/amazon.nova-2-lite-v1:0
+  - arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-2-lite-v1:0
+
+====================================================================================================
+MODEL : Amazon Nova 2 Lite
+MODE  : GLOBAL_CRIS
+ID    : global.amazon.nova-2-lite-v1:0
+AWS documented support expected: True
+====================================================================================================
+
+STATUS: FAILURE
+ERROR: An error occurred (AccessDeniedException) when calling the Converse operation: User: arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/Scenario3CRISSTS is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:::foundation-model/amazon.nova-2-lite-v1:0 with an explicit deny in a service control policy: arn:aws:organizations::691319007355:policy/o-oezy0dd9gc/service_control_policy/p-4i5rkk5u
+
+====================================================================================================
+MODEL : Meta Llama 4 Maverick
+MODE  : DIRECT
+ID    : meta.llama4-maverick-17b-instruct-v1:0
+AWS documented support expected: False
+====================================================================================================
+
+STATUS: FAILURE
+ERROR: An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID meta.llama4-maverick-17b-instruct-v1:0 with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+
+Looking up AWS inference profile...
+Profile Name : US Llama 4 Maverick 17B Instruct
+Profile ARN  : arn:aws:bedrock:us-east-1:196856463470:inference-profile/us.meta.llama4-maverick-17b-instruct-v1:0
+Profile Type : SYSTEM_DEFINED
+Destinations:
+  - arn:aws:bedrock:us-east-1::foundation-model/meta.llama4-maverick-17b-instruct-v1:0
+  - arn:aws:bedrock:us-east-2::foundation-model/meta.llama4-maverick-17b-instruct-v1:0
+  - arn:aws:bedrock:us-west-2::foundation-model/meta.llama4-maverick-17b-instruct-v1:0
+
+====================================================================================================
+MODEL : Meta Llama 4 Maverick
+MODE  : US_CRIS
+ID    : us.meta.llama4-maverick-17b-instruct-v1:0
+AWS documented support expected: True
+====================================================================================================
+
+MODEL RESPONSE:
+Amazon Bedrock's cross-region inference allows users to deploy and manage AI models in one AWS region while making predictions or inferences in another region. This feature enables organizations to reduce latency by serving models from a region closer to their users or applications. By replicating models across regions, Bedrock ensures that inference requests are handled efficiently and with minimal delay, improving overall application performance and user experience.
+
+Request ID:
+acc4def9-ef3e-4378-9f89-f9ffc7c8c7b7
+
+Token Usage:
+Input  = 46
+Output = 78
+Total  = 124
+
+STATUS: SUCCESS
+
+Looking up AWS inference profile...
+Profile lookup failed:
+An error occurred (ResourceNotFoundException) when calling the GetInferenceProfile operation: Inference profile not found.
+
+====================================================================================================
+MODEL : Meta Llama 4 Maverick
+MODE  : GLOBAL_CRIS
+ID    : global.meta.llama4-maverick-17b-instruct-v1:0
+AWS documented support expected: False
+====================================================================================================
+
+STATUS: FAILURE
+ERROR: An error occurred (ValidationException) when calling the Converse operation: The provided model identifier is invalid.
+
+
+======================================================================================================================================================
+FINAL SCENARIO 3 RESULTS
+======================================================================================================================================================
+Model                         Mode           Expected    Status      Validation            Model ID
+------------------------------------------------------------------------------------------------------------------------------------------------------
+Claude Sonnet 5               DIRECT         False       FAILURE     EXPECTED_FAILURE      anthropic.claude-sonnet-5
+Claude Sonnet 5               US_CRIS        True        SUCCESS     PASS                  us.anthropic.claude-sonnet-5
+Claude Sonnet 5               GLOBAL_CRIS    True        FAILURE     UNEXPECTED_FAILURE    global.anthropic.claude-sonnet-5
+Claude Opus 5                 DIRECT         False       FAILURE     EXPECTED_FAILURE      anthropic.claude-opus-5
+Claude Opus 5                 US_CRIS        True        SUCCESS     PASS                  us.anthropic.claude-opus-5
+Claude Opus 5                 GLOBAL_CRIS    True        FAILURE     UNEXPECTED_FAILURE    global.anthropic.claude-opus-5
+Amazon Nova 2 Lite            DIRECT         True        FAILURE     UNEXPECTED_FAILURE    amazon.nova-2-lite-v1:0
+Amazon Nova 2 Lite            US_CRIS        True        SUCCESS     PASS                  us.amazon.nova-2-lite-v1:0
+Amazon Nova 2 Lite            GLOBAL_CRIS    True        FAILURE     UNEXPECTED_FAILURE    global.amazon.nova-2-lite-v1:0
+Meta Llama 4 Maverick         DIRECT         False       FAILURE     EXPECTED_FAILURE      meta.llama4-maverick-17b-instruct-v1:0
+Meta Llama 4 Maverick         US_CRIS        True        SUCCESS     PASS                  us.meta.llama4-maverick-17b-instruct-v1:0
+Meta Llama 4 Maverick         GLOBAL_CRIS    False       FAILURE     EXPECTED_FAILURE      global.meta.llama4-maverick-17b-instruct-v1:0
+
+
+==============================================================================================================
+EXPECTED CUR / COST ATTRIBUTION
+==============================================================================================================
+
+STS / IAM PRINCIPAL:
+iamPrincipal/ApplicationShortname = grh-cris-sts
+iamPrincipal/AssetID = MSR06632-CRIS
+
+Customer AIP resource tags:
+NONE
+
+No customer-created AIP was used in Scenario 3.
+
+Routing validation:
+For successful US_CRIS / GLOBAL_CRIS requests, use the Request ID and CloudTrail to inspect:
+additionalEventData.inferenceRegion
+
+CSV output:
+scenario3_direct_us_global_results.csv
+
+Scenario 3 complete.
+sagemaker-user@default:~$ 
