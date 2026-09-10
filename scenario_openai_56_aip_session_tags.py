@@ -4,7 +4,7 @@ import os
 from datetime import datetime, timezone
 
 # ============================================================
-# OPENAI GPT-5.6 BEDROCK SESSION-TAG TEST SUITE
+# OPENAI BEDROCK SESSION-TAG TEST SUITE
 #
 # Mirrors the repository's existing scenarios:
 #   Scenario 1 - AIP + STS tag mismatch
@@ -13,31 +13,38 @@ from datetime import datetime, timezone
 #   Scenario 6 - Multiple applications, same IAM role
 #
 # Models:
+#   GPT-6 Astra
 #   GPT-5.6 Terra
 #   GPT-5.6 Luna
 #   GPT-5.6 Sol
 #
 # Current bedrock-runtime behavior (Sep 2026):
-#   - All three support Converse.
-#   - All three support US Geo CRIS and Global CRIS.
-#   - None of the three supports direct/in-Region invocation on
-#     the bedrock-runtime endpoint.
-#   - Terra supports Application Inference Profiles with Converse.
-#   - Luna and Sol currently list Application Inference Profiles
-#     as NOT supported on bedrock-runtime.
+#   - All models below support Converse.
+#   - All support US Geo CRIS and Global CRIS.
+#   - Direct/in-Region model IDs are not supported on bedrock-runtime.
+#   - GPT-6 Astra and GPT-5.6 Terra support Application Inference
+#     Profiles with Converse.
+#   - GPT-5.6 Luna and GPT-5.6 Sol currently list Application
+#     Inference Profiles as not supported on bedrock-runtime.
 #
-# Scenario 1 intentionally ATTEMPTS AIP creation for all 3 models.
-# Terra is expected to succeed. Luna/Sol are expected to fail AIP
-# creation; those are recorded as EXPECTED_FAILURE rather than skipped.
+# Scenario 1 attempts AIP creation for every model so the account-level
+# result is captured rather than silently skipping unsupported models.
 # ============================================================
 
 AWS_REGION = "us-east-1"
 ACCOUNT_ID = "196856463470"
 ROLE_ARN = f"arn:aws:iam::{ACCOUNT_ID}:role/SandboxServiceRole"
-OUTPUT_FILE = "openai_56_session_tag_results.csv"
+OUTPUT_FILE = "openai_session_tag_results.csv"
 PROMPT = "Explain Amazon Bedrock granular cost attribution in two sentences."
 
 MODELS = [
+    {
+        "name": "OpenAI GPT-6 Astra",
+        "base_model_id": "openai.gpt-6-astra",
+        "us_model_id": "us.openai.gpt-6-astra",
+        "global_model_id": "global.openai.gpt-6-astra",
+        "aip_supported": True,
+    },
     {
         "name": "OpenAI GPT-5.6 Terra",
         "base_model_id": "openai.gpt-5.6-terra",
@@ -61,21 +68,17 @@ MODELS = [
     },
 ]
 
-# Scenario 1: AIP and STS tags intentionally differ.
 S1_AIP_APP = "openai-aip"
 S1_AIP_ASSET = "MSR06632-OPENAI-AIP"
 S1_STS_APP = "openai-sts"
 S1_STS_ASSET = "MSR99999-OPENAI-STS"
 
-# Scenario 2: one tagged STS session, no customer AIP.
 S2_STS_APP = "openai-sts-only"
 S2_STS_ASSET = "MSR06632-OPENAI-STS"
 
-# Scenario 3: same tagged STS session across direct/US/global.
 S3_STS_APP = "openai-cris-sts"
 S3_STS_ASSET = "MSR06632-OPENAI-CRIS"
 
-# Scenario 6: multiple apps, same IAM role, different STS tags.
 APPLICATIONS = [
     {
         "application_name": "OpenAI-App-A",
@@ -253,7 +256,7 @@ def build_source_arn(system_profile_id):
 def create_aip(session, model, app_shortname, asset_id):
     bedrock = session.client("bedrock", region_name=AWS_REGION)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S-%f")
-    name = f"oai56-{safe_name(model['name'])}-{stamp}"[:64]
+    name = f"openai-{safe_name(model['name'])}-{stamp}"[:64]
     source_arn = build_source_arn(model["us_model_id"])
 
     print("\nCreating Application Inference Profile")
@@ -264,7 +267,7 @@ def create_aip(session, model, app_shortname, asset_id):
 
     response = bedrock.create_inference_profile(
         inferenceProfileName=name,
-        description="OpenAI GPT-5.6 AIP STS session-tag attribution test",
+        description="OpenAI AIP STS session-tag attribution test",
         modelSource={"copyFrom": source_arn},
         tags=[
             {"key": "ApplicationShortname", "value": app_shortname},
@@ -363,7 +366,7 @@ def run_scenario1():
     print(f"STS tags: {S1_STS_APP} / {S1_STS_ASSET}")
 
     session, assumed_arn = assume_tagged_session(
-        "OpenAI56-Scenario1",
+        "OpenAI-Scenario1",
         S1_STS_APP,
         S1_STS_ASSET,
     )
@@ -426,7 +429,7 @@ def run_scenario2():
     print("#" * 110)
 
     session, assumed_arn = assume_tagged_session(
-        "OpenAI56-Scenario2",
+        "OpenAI-Scenario2",
         S2_STS_APP,
         S2_STS_ASSET,
     )
@@ -460,7 +463,7 @@ def run_scenario3():
     print("#" * 110)
 
     session, assumed_arn = assume_tagged_session(
-        "OpenAI56-Scenario3",
+        "OpenAI-Scenario3",
         S3_STS_APP,
         S3_STS_ASSET,
     )
@@ -507,7 +510,7 @@ def run_scenario6():
 
     for app in APPLICATIONS:
         session, assumed_arn = assume_tagged_session(
-            f"OpenAI56-{app['application_name']}",
+            f"OpenAI-{app['application_name']}",
             app["application_shortname"],
             app["asset_id"],
         )
@@ -543,12 +546,12 @@ def print_expected_cur():
     print("EXPECTED CUR ATTRIBUTION")
     print("=" * 110)
 
-    print("\nScenario 1 - Terra successful AIP request:")
+    print("\nScenario 1 - successful Astra/Terra AIP requests:")
     print(f"resourceTags/ApplicationShortname = {S1_AIP_APP}")
     print(f"resourceTags/AssetID              = {S1_AIP_ASSET}")
     print(f"iamPrincipal/ApplicationShortname = {S1_STS_APP}")
     print(f"iamPrincipal/AssetID              = {S1_STS_ASSET}")
-    print("Luna/Sol currently cannot produce AIP resource-tag usage because AIP is unsupported.")
+    print("Luna/Sol AIP attempts are expected to fail under current model-card support.")
 
     print("\nScenario 2:")
     print(f"iamPrincipal/ApplicationShortname = {S2_STS_APP}")
@@ -577,7 +580,7 @@ def print_results(title, results):
 
 if __name__ == "__main__":
     print("\n" + "=" * 110)
-    print("OPENAI GPT-5.6 BEDROCK SESSION-TAG TEST SUITE")
+    print("OPENAI BEDROCK SESSION-TAG TEST SUITE")
     print("=" * 110)
 
     show_original_identity()
