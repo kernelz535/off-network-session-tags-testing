@@ -3,14 +3,14 @@ import csv
 import os
 from datetime import datetime, timezone
 
-# ============================================================
+# ==================================================================================================
 # OPENAI BEDROCK SESSION-TAG TEST SUITE
 #
-# Mirrors the repository's existing scenarios:
-#   Scenario 1 - AIP + STS tag mismatch
-#   Scenario 2 - STS-only baseline
-#   Scenario 3 - Direct vs US CRIS vs Global CRIS + STS
-#   Scenario 6 - Multiple applications, same IAM role
+# Scenarios:
+#   1 - Application Inference Profile (AIP) + STS tag mismatch
+#   2 - STS-only baseline using US geographic CRIS
+#   3 - Direct vs US geographic CRIS vs Global CRIS using the same STS session
+#   6 - Multiple applications using the same IAM role with different STS session tags
 #
 # Models:
 #   GPT-6 Astra
@@ -18,18 +18,16 @@ from datetime import datetime, timezone
 #   GPT-5.6 Luna
 #   GPT-5.6 Sol
 #
-# Current bedrock-runtime behavior (Sep 2026):
-#   - All models below support Converse.
-#   - All support US Geo CRIS and Global CRIS.
-#   - Direct/in-Region model IDs are not supported on bedrock-runtime.
-#   - GPT-6 Astra and GPT-5.6 Terra support Application Inference
-#     Profiles with Converse.
-#   - GPT-5.6 Luna and GPT-5.6 Sol currently list Application
-#     Inference Profiles as not supported on bedrock-runtime.
+# IMPORTANT:
+#   Scenario 1 invokes the CUSTOMER APPLICATION INFERENCE PROFILE ARN through Bedrock Runtime Converse:
+#       runtime.converse(modelId=<APPLICATION_INFERENCE_PROFILE_ARN>, ...)
 #
-# Scenario 1 attempts AIP creation for every model so the account-level
-# result is captured rather than silently skipping unsupported models.
-# ============================================================
+#   The AIP itself is copied from the US geographic system inference profile:
+#       arn:aws:bedrock:<region>:<account>:inference-profile/us.openai....
+#
+# Runtime validation in this AWS account on Sep 10, 2026 showed successful AIP creation + Converse
+# invocation for Astra, Terra, Luna, and Sol, so Scenario 1 now expects AIP success for all four.
+# ==================================================================================================
 
 AWS_REGION = "us-east-1"
 ACCOUNT_ID = "196856463470"
@@ -57,28 +55,32 @@ MODELS = [
         "base_model_id": "openai.gpt-5.6-luna",
         "us_model_id": "us.openai.gpt-5.6-luna",
         "global_model_id": "global.openai.gpt-5.6-luna",
-        "aip_supported": False,
+        "aip_supported": True,
     },
     {
         "name": "OpenAI GPT-5.6 Sol",
         "base_model_id": "openai.gpt-5.6-sol",
         "us_model_id": "us.openai.gpt-5.6-sol",
         "global_model_id": "global.openai.gpt-5.6-sol",
-        "aip_supported": False,
+        "aip_supported": True,
     },
 ]
 
+# Scenario 1: AIP resource tags intentionally differ from STS session tags.
 S1_AIP_APP = "openai-aip"
 S1_AIP_ASSET = "MSR06632-OPENAI-AIP"
 S1_STS_APP = "openai-sts"
 S1_STS_ASSET = "MSR99999-OPENAI-STS"
 
+# Scenario 2: STS tags only, no customer AIP.
 S2_STS_APP = "openai-sts-only"
 S2_STS_ASSET = "MSR06632-OPENAI-STS"
 
+# Scenario 3: one STS session reused across direct / US CRIS / Global CRIS tests.
 S3_STS_APP = "openai-cris-sts"
 S3_STS_ASSET = "MSR06632-OPENAI-CRIS"
 
+# Scenario 6: same IAM role, one differently tagged STS session per application.
 APPLICATIONS = [
     {
         "application_name": "OpenAI-App-A",
@@ -102,8 +104,10 @@ CSV_FIELDS = [
     "scenario",
     "application",
     "model",
+    "invocation_api",
     "invocation_mode",
     "invocation_target",
+    "source_model_id",
     "expected_supported",
     "iam_role",
     "assumed_role_arn",
@@ -137,21 +141,44 @@ def safe_name(value):
     )
 
 
+def expected_text(value):
+    return "SUCCESS" if value else "FAILURE"
+
+
+def print_table(headers, rows):
+    rows = [[str(value) for value in row] for row in rows]
+    widths = []
+    for index, header in enumerate(headers):
+        width = len(str(header))
+        for row in rows:
+            if index < len(row):
+                width = max(width, len(row[index]))
+        widths.append(width)
+
+    separator = "+-" + "-+-".join("-" * width for width in widths) + "-+"
+    print(separator)
+    print("| " + " | ".join(str(header).ljust(widths[i]) for i, header in enumerate(headers)) + " |")
+    print(separator)
+    for row in rows:
+        print("| " + " | ".join(row[i].ljust(widths[i]) for i in range(len(headers))) + " |")
+    print(separator)
+
+
 def show_original_identity():
     sts = boto3.client("sts", region_name=AWS_REGION)
     identity = sts.get_caller_identity()
-    print("\n" + "=" * 100)
+    print("\n" + "=" * 120)
     print("ORIGINAL IDENTITY")
-    print("=" * 100)
+    print("=" * 120)
     print(identity["Arn"])
 
 
 def assume_tagged_session(session_name, app_shortname, asset_id):
     sts = boto3.client("sts", region_name=AWS_REGION)
 
-    print("\n" + "=" * 100)
+    print("\n" + "=" * 120)
     print("ASSUMING SAME IAM ROLE WITH SESSION TAGS")
-    print("=" * 100)
+    print("=" * 120)
     print(f"Role                 = {ROLE_ARN}")
     print(f"RoleSessionName      = {session_name}")
     print(f"ApplicationShortname = {app_shortname}")
@@ -194,10 +221,11 @@ def empty_invocation(error=""):
 def converse(session, model_name, model_id):
     runtime = session.client("bedrock-runtime", region_name=AWS_REGION)
 
-    print("\n" + "-" * 100)
+    print("\n" + "-" * 120)
     print(f"MODEL    : {model_name}")
-    print(f"TARGET   : {model_id}")
-    print("-" * 100)
+    print("API      : bedrock-runtime Converse")
+    print(f"modelId  : {model_id}")
+    print("-" * 120)
 
     try:
         response = runtime.converse(
@@ -213,11 +241,7 @@ def converse(session, model_name, model_id):
 
         metadata = response.get("ResponseMetadata", {})
         usage = response.get("usage", {})
-        content = (
-            response.get("output", {})
-            .get("message", {})
-            .get("content", [])
-        )
+        content = response.get("output", {}).get("message", {}).get("content", [])
         answer = "\n".join(
             block.get("text", "")
             for block in content
@@ -261,6 +285,7 @@ def create_aip(session, model, app_shortname, asset_id):
 
     print("\nCreating Application Inference Profile")
     print(f"Model      = {model['name']}")
+    print(f"Source ID  = {model['us_model_id']}")
     print(f"Source ARN = {source_arn}")
     print(f"AIP App    = {app_shortname}")
     print(f"AIP Asset  = {asset_id}")
@@ -301,7 +326,7 @@ def validate(expected_supported, actual_status):
     return "UNEXPECTED_SUCCESS"
 
 
-def save_result(**row):
+def save_result(row):
     exists = os.path.isfile(OUTPUT_FILE)
     with open(OUTPUT_FILE, "a", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=CSV_FIELDS)
@@ -316,6 +341,7 @@ def record_result(
     model,
     mode,
     target,
+    source_model_id,
     expected_supported,
     assumed_arn,
     invocation,
@@ -327,48 +353,53 @@ def record_result(
 ):
     result_validation = validate(expected_supported, invocation["status"])
 
-    save_result(
-        datetime=utc_now(),
-        scenario=scenario,
-        application=application,
-        model=model["name"],
-        invocation_mode=mode,
-        invocation_target=target,
-        expected_supported=expected_supported,
-        iam_role=ROLE_ARN,
-        assumed_role_arn=assumed_arn,
-        aip_arn=aip_arn,
-        aip_application_shortname=aip_app,
-        aip_asset_id=aip_asset,
-        sts_application_shortname=sts_app,
-        sts_asset_id=sts_asset,
-        request_id=invocation["request_id"],
-        http_status=invocation["http_status"],
-        input_tokens=invocation["input_tokens"],
-        output_tokens=invocation["output_tokens"],
-        total_tokens=invocation["total_tokens"],
-        status=invocation["status"],
-        validation=result_validation,
-        error=invocation["error"],
-    )
+    row = {
+        "datetime": utc_now(),
+        "scenario": scenario,
+        "application": application,
+        "model": model["name"],
+        "invocation_api": "bedrock-runtime.converse",
+        "invocation_mode": mode,
+        "invocation_target": target,
+        "source_model_id": source_model_id,
+        "expected_supported": expected_supported,
+        "iam_role": ROLE_ARN,
+        "assumed_role_arn": assumed_arn,
+        "aip_arn": aip_arn,
+        "aip_application_shortname": aip_app,
+        "aip_asset_id": aip_asset,
+        "sts_application_shortname": sts_app,
+        "sts_asset_id": sts_asset,
+        "request_id": invocation["request_id"],
+        "http_status": invocation["http_status"],
+        "input_tokens": invocation["input_tokens"],
+        "output_tokens": invocation["output_tokens"],
+        "total_tokens": invocation["total_tokens"],
+        "status": invocation["status"],
+        "validation": result_validation,
+        "error": invocation["error"],
+    }
+    save_result(row)
+    return row
 
-    return result_validation
 
-
-# ============================================================
+# ==================================================================================================
 # SCENARIO 1 - AIP + STS TAG MISMATCH
-# ============================================================
+# ==================================================================================================
 def run_scenario1():
-    print("\n" + "#" * 110)
+    print("\n" + "#" * 120)
     print("SCENARIO 1 - AIP + STS TAG MISMATCH")
-    print("#" * 110)
-    print(f"AIP tags: {S1_AIP_APP} / {S1_AIP_ASSET}")
-    print(f"STS tags: {S1_STS_APP} / {S1_STS_ASSET}")
+    print("#" * 120)
+    print("Purpose: Validate separate AIP resource-tag and STS principal/session-tag attribution.")
+    print("Invocation API: bedrock-runtime Converse")
+    print("Invocation target: CUSTOMER APPLICATION INFERENCE PROFILE ARN")
+    print("AIP source: US geographic system inference profile (us.openai....)")
+    print("Flow: US CRIS system profile -> Customer AIP -> Converse(modelId=<AIP ARN>)")
+    print(f"AIP tags: ApplicationShortname={S1_AIP_APP}, AssetID={S1_AIP_ASSET}")
+    print(f"STS tags: ApplicationShortname={S1_STS_APP}, AssetID={S1_STS_ASSET}")
 
     session, assumed_arn = assume_tagged_session(
-        "OpenAI-Scenario1",
-        S1_STS_APP,
-        S1_STS_ASSET,
+        "OpenAI-Scenario1", S1_STS_APP, S1_STS_ASSET
     )
 
     results = []
@@ -378,40 +409,32 @@ def run_scenario1():
         for model in MODELS:
             aip_arn = ""
             expected = model["aip_supported"]
-
             try:
-                aip_arn = create_aip(
-                    session,
-                    model,
-                    S1_AIP_APP,
-                    S1_AIP_ASSET,
-                )
+                aip_arn = create_aip(session, model, S1_AIP_APP, S1_AIP_ASSET)
                 created_aips.append(aip_arn)
                 invocation = converse(session, model["name"], aip_arn)
             except Exception as exc:
                 print(f"AIP CREATION/INVOCATION FAILURE: {exc}")
                 invocation = empty_invocation(str(exc))
 
-            result_validation = record_result(
-                scenario="Scenario 1 - AIP + STS Tag Mismatch",
-                application="Mismatch-Test",
-                model=model,
-                mode="AIP",
-                target=aip_arn or model["us_model_id"],
-                expected_supported=expected,
-                assumed_arn=assumed_arn,
-                invocation=invocation,
-                sts_app=S1_STS_APP,
-                sts_asset=S1_STS_ASSET,
-                aip_arn=aip_arn,
-                aip_app=S1_AIP_APP,
-                aip_asset=S1_AIP_ASSET,
-            )
-
             results.append(
-                (model["name"], invocation["status"], result_validation)
+                record_result(
+                    scenario="Scenario 1 - AIP + STS Tag Mismatch",
+                    application="Mismatch-Test",
+                    model=model,
+                    mode="AIP_CONVERSE",
+                    target=aip_arn or "AIP creation failed",
+                    source_model_id=model["us_model_id"],
+                    expected_supported=expected,
+                    assumed_arn=assumed_arn,
+                    invocation=invocation,
+                    sts_app=S1_STS_APP,
+                    sts_asset=S1_STS_ASSET,
+                    aip_arn=aip_arn,
+                    aip_app=S1_AIP_APP,
+                    aip_asset=S1_AIP_ASSET,
+                )
             )
-
     finally:
         print("\nCleaning up Scenario 1 AIPs...")
         for aip_arn in created_aips:
@@ -420,168 +443,277 @@ def run_scenario1():
     return results
 
 
-# ============================================================
+# ==================================================================================================
 # SCENARIO 2 - STS ONLY / NO CUSTOMER AIP
-# ============================================================
+# ==================================================================================================
 def run_scenario2():
-    print("\n" + "#" * 110)
+    print("\n" + "#" * 120)
     print("SCENARIO 2 - STS ONLY / NO CUSTOMER AIP")
-    print("#" * 110)
+    print("#" * 120)
+    print("Purpose: Validate STS session-tag attribution without an Application Inference Profile.")
+    print("Invocation API: bedrock-runtime Converse")
+    print("Invocation target: US geographic CRIS model ID (us.openai....)")
+    print("Customer AIP: NONE")
+    print(f"STS tags: ApplicationShortname={S2_STS_APP}, AssetID={S2_STS_ASSET}")
 
     session, assumed_arn = assume_tagged_session(
-        "OpenAI-Scenario2",
-        S2_STS_APP,
-        S2_STS_ASSET,
+        "OpenAI-Scenario2", S2_STS_APP, S2_STS_ASSET
     )
 
     results = []
     for model in MODELS:
         invocation = converse(session, model["name"], model["us_model_id"])
-        result_validation = record_result(
-            scenario="Scenario 2 - STS Only",
-            application="STS-Only-Test",
-            model=model,
-            mode="US_CRIS",
-            target=model["us_model_id"],
-            expected_supported=True,
-            assumed_arn=assumed_arn,
-            invocation=invocation,
-            sts_app=S2_STS_APP,
-            sts_asset=S2_STS_ASSET,
+        results.append(
+            record_result(
+                scenario="Scenario 2 - STS Only",
+                application="STS-Only-Test",
+                model=model,
+                mode="US_CRIS",
+                target=model["us_model_id"],
+                source_model_id=model["us_model_id"],
+                expected_supported=True,
+                assumed_arn=assumed_arn,
+                invocation=invocation,
+                sts_app=S2_STS_APP,
+                sts_asset=S2_STS_ASSET,
+            )
         )
-        results.append((model["name"], invocation["status"], result_validation))
-
     return results
 
 
-# ============================================================
+# ==================================================================================================
 # SCENARIO 3 - DIRECT vs US CRIS vs GLOBAL CRIS + STS
-# ============================================================
+# ==================================================================================================
 def run_scenario3():
-    print("\n" + "#" * 110)
+    print("\n" + "#" * 120)
     print("SCENARIO 3 - DIRECT vs US CRIS vs GLOBAL CRIS + STS")
-    print("#" * 110)
+    print("#" * 120)
+    print("Purpose: Compare three OpenAI Bedrock model-ID forms while keeping the same STS session tags.")
+    print("Invocation API: bedrock-runtime Converse for ALL three cases")
+    print(f"STS tags: ApplicationShortname={S3_STS_APP}, AssetID={S3_STS_ASSET}")
+    print("Model ID types:")
+    print("  DIRECT      = openai.<model>         -> base/direct model ID")
+    print("  US_CRIS     = us.openai.<model>      -> US geographic cross-Region inference profile")
+    print("  GLOBAL_CRIS = global.openai.<model>  -> global cross-Region inference profile")
 
     session, assumed_arn = assume_tagged_session(
-        "OpenAI-Scenario3",
-        S3_STS_APP,
-        S3_STS_ASSET,
+        "OpenAI-Scenario3", S3_STS_APP, S3_STS_ASSET
     )
 
     results = []
-
     for model in MODELS:
         cases = [
             ("DIRECT", model["base_model_id"], False),
             ("US_CRIS", model["us_model_id"], True),
             ("GLOBAL_CRIS", model["global_model_id"], True),
         ]
-
         for mode, target, expected in cases:
             invocation = converse(session, model["name"], target)
-            result_validation = record_result(
-                scenario="Scenario 3 - Direct vs US CRIS vs Global CRIS",
-                application="CRIS-Test",
-                model=model,
-                mode=mode,
-                target=target,
-                expected_supported=expected,
-                assumed_arn=assumed_arn,
-                invocation=invocation,
-                sts_app=S3_STS_APP,
-                sts_asset=S3_STS_ASSET,
-            )
             results.append(
-                (model["name"], mode, invocation["status"], result_validation)
+                record_result(
+                    scenario="Scenario 3 - Direct vs US CRIS vs Global CRIS",
+                    application="CRIS-Test",
+                    model=model,
+                    mode=mode,
+                    target=target,
+                    source_model_id=target,
+                    expected_supported=expected,
+                    assumed_arn=assumed_arn,
+                    invocation=invocation,
+                    sts_app=S3_STS_APP,
+                    sts_asset=S3_STS_ASSET,
+                )
             )
-
     return results
 
 
-# ============================================================
+# ==================================================================================================
 # SCENARIO 6 - MULTIPLE APPLICATIONS / SAME IAM ROLE
-# ============================================================
+# ==================================================================================================
 def run_scenario6():
-    print("\n" + "#" * 110)
+    print("\n" + "#" * 120)
     print("SCENARIO 6 - MULTIPLE APPLICATIONS / SAME IAM ROLE")
-    print("#" * 110)
+    print("#" * 120)
+    print("Purpose: Validate cost attribution for multiple applications that all use the SAME IAM role")
+    print("         but assume separate STS sessions with different ApplicationShortname / AssetID tags.")
+    print("Invocation API: bedrock-runtime Converse")
+    print("Invocation target: US geographic CRIS model ID (us.openai....)")
+    print("Customer AIP: NONE")
+    print(f"Shared IAM role: {ROLE_ARN}")
 
     results = []
-
     for app in APPLICATIONS:
         session, assumed_arn = assume_tagged_session(
             f"OpenAI-{app['application_name']}",
             app["application_shortname"],
             app["asset_id"],
         )
-
         for model in MODELS:
             invocation = converse(session, model["name"], model["us_model_id"])
-            result_validation = record_result(
-                scenario="Scenario 6 - Multiple Apps Same IAM Role",
-                application=app["application_name"],
-                model=model,
-                mode="US_CRIS",
-                target=model["us_model_id"],
-                expected_supported=True,
-                assumed_arn=assumed_arn,
-                invocation=invocation,
-                sts_app=app["application_shortname"],
-                sts_asset=app["asset_id"],
-            )
             results.append(
-                (
-                    app["application_name"],
-                    model["name"],
-                    invocation["status"],
-                    result_validation,
+                record_result(
+                    scenario="Scenario 6 - Multiple Apps Same IAM Role",
+                    application=app["application_name"],
+                    model=model,
+                    mode="US_CRIS",
+                    target=model["us_model_id"],
+                    source_model_id=model["us_model_id"],
+                    expected_supported=True,
+                    assumed_arn=assumed_arn,
+                    invocation=invocation,
+                    sts_app=app["application_shortname"],
+                    sts_asset=app["asset_id"],
                 )
             )
-
     return results
 
 
-def print_expected_cur():
-    print("\n" + "=" * 110)
-    print("EXPECTED CUR ATTRIBUTION")
-    print("=" * 110)
-
-    print("\nScenario 1 - successful Astra/Terra AIP requests:")
-    print(f"resourceTags/ApplicationShortname = {S1_AIP_APP}")
-    print(f"resourceTags/AssetID              = {S1_AIP_ASSET}")
-    print(f"iamPrincipal/ApplicationShortname = {S1_STS_APP}")
-    print(f"iamPrincipal/AssetID              = {S1_STS_ASSET}")
-    print("Luna/Sol AIP attempts are expected to fail under current model-card support.")
-
-    print("\nScenario 2:")
-    print(f"iamPrincipal/ApplicationShortname = {S2_STS_APP}")
-    print(f"iamPrincipal/AssetID              = {S2_STS_ASSET}")
-
-    print("\nScenario 3:")
-    print(f"iamPrincipal/ApplicationShortname = {S3_STS_APP}")
-    print(f"iamPrincipal/AssetID              = {S3_STS_ASSET}")
-
-    print("\nScenario 6:")
-    for app in APPLICATIONS:
-        print(
-            f"{app['application_name']}: "
-            f"iamPrincipal/ApplicationShortname={app['application_shortname']}, "
-            f"iamPrincipal/AssetID={app['asset_id']}"
-        )
+def print_failure_details(results):
+    failures = [row for row in results if row["status"] == "FAILURE"]
+    if not failures:
+        return
+    print("\nFailure details:")
+    for row in failures:
+        print(f"- {row['model']} / {row['invocation_mode']}: {row['error']}")
 
 
-def print_results(title, results):
-    print("\n" + "=" * 110)
-    print(title)
-    print("=" * 110)
-    for row in results:
-        print(" | ".join(str(value) for value in row))
+def print_manager_summary(s1, s2, s3, s6):
+    print("\n\n" + "=" * 140)
+    print("OPENAI BEDROCK SESSION-TAG TEST - MANAGER SUMMARY")
+    print("=" * 140)
+    print(f"AWS Region : {AWS_REGION}")
+    print(f"IAM Role   : {ROLE_ARN}")
+    print("API used   : Amazon Bedrock Runtime Converse")
+
+    # Scenario 1
+    print("\n" + "=" * 140)
+    print("SCENARIO 1 - APPLICATION INFERENCE PROFILE (AIP) + STS TAG MISMATCH")
+    print("=" * 140)
+    print("What was tested:")
+    print("  Verify that AIP resource tags and STS principal/session tags can be attributed independently")
+    print("  for the SAME Bedrock model invocation.")
+    print("How the model was invoked:")
+    print("  1. Assume SandboxServiceRole with STS session tags.")
+    print("  2. Create a customer Application Inference Profile copied from the model's US CRIS profile.")
+    print("  3. Invoke Bedrock Runtime Converse with modelId=<CUSTOMER AIP ARN>.")
+    print("  Flow: US CRIS -> Customer AIP -> bedrock-runtime.converse(modelId=AIP_ARN)")
+    print(f"AIP resource tags : ApplicationShortname={S1_AIP_APP}, AssetID={S1_AIP_ASSET}")
+    print(f"STS session tags  : ApplicationShortname={S1_STS_APP}, AssetID={S1_STS_ASSET}")
+
+    print_table(
+        ["Model", "AIP Source (US CRIS)", "Expected", "Actual", "Validation"],
+        [
+            [row["model"], row["source_model_id"], expected_text(row["expected_supported"]), row["status"], row["validation"]]
+            for row in s1
+        ],
+    )
+    print("Invocation targets created during this run:")
+    for row in s1:
+        print(f"  {row['model']}: Converse modelId={row['aip_arn'] or 'AIP creation failed'}")
+    print_failure_details(s1)
+
+    # Scenario 2
+    print("\n" + "=" * 140)
+    print("SCENARIO 2 - STS SESSION TAGS ONLY / NO CUSTOMER AIP")
+    print("=" * 140)
+    print("What was tested:")
+    print("  Verify IAM principal/session-tag attribution when no customer AIP is involved.")
+    print("How the model was invoked:")
+    print("  Assume the IAM role with STS tags, then call Bedrock Runtime Converse directly against")
+    print("  the US geographic CRIS system inference-profile model ID (us.openai....).")
+    print(f"STS session tags: ApplicationShortname={S2_STS_APP}, AssetID={S2_STS_ASSET}")
+
+    print_table(
+        ["Model", "Invocation Type", "Converse modelId", "Expected", "Actual", "Validation"],
+        [
+            [row["model"], "US CRIS", row["invocation_target"], expected_text(row["expected_supported"]), row["status"], row["validation"]]
+            for row in s2
+        ],
+    )
+    print_failure_details(s2)
+
+    # Scenario 3
+    print("\n" + "=" * 140)
+    print("SCENARIO 3 - DIRECT vs US CRIS vs GLOBAL CRIS USING THE SAME STS SESSION")
+    print("=" * 140)
+    print("What was tested:")
+    print("  Compare the three model-ID forms while holding the IAM role and STS session tags constant.")
+    print("How the models were invoked:")
+    print("  All calls use bedrock-runtime.converse(); only the modelId changes.")
+    print(f"STS session tags: ApplicationShortname={S3_STS_APP}, AssetID={S3_STS_ASSET}")
+    print("\nThree model-ID types used:")
+    print_table(
+        ["Type", "Pattern", "Meaning"],
+        [
+            ["DIRECT", "openai.<model>", "Base/direct model ID"],
+            ["US_CRIS", "us.openai.<model>", "US geographic cross-Region inference profile"],
+            ["GLOBAL_CRIS", "global.openai.<model>", "Global cross-Region inference profile"],
+        ],
+    )
+
+    print("Scenario 3 results:")
+    print_table(
+        ["Model", "Type", "Converse modelId", "Expected", "Actual", "Validation"],
+        [
+            [row["model"], row["invocation_mode"], row["invocation_target"], expected_text(row["expected_supported"]), row["status"], row["validation"]]
+            for row in s3
+        ],
+    )
+    print_failure_details(s3)
+
+    # Scenario 6
+    print("\n" + "=" * 140)
+    print("SCENARIO 6 - MULTIPLE APPLICATIONS USING THE SAME IAM ROLE")
+    print("=" * 140)
+    print("What was tested:")
+    print("  Verify that multiple applications can share one IAM role while remaining distinguishable")
+    print("  through different STS session tags for granular cost attribution.")
+    print("How the models were invoked:")
+    print("  For each application, assume the SAME SandboxServiceRole with that application's tags,")
+    print("  then invoke each model with bedrock-runtime.converse(modelId=<US CRIS ID>)."){chr(10)}    print("  Customer AIP: NONE")
+
+    print("Applications / STS tags:")
+    print_table(
+        ["Application", "ApplicationShortname", "AssetID", "IAM Role"],
+        [
+            [app["application_name"], app["application_shortname"], app["asset_id"], ROLE_ARN]
+            for app in APPLICATIONS
+        ],
+    )
+
+    print("Scenario 6 results:")
+    print_table(
+        ["Application", "Model", "Invocation", "Converse modelId", "Actual", "Validation"],
+        [
+            [row["application"], row["model"], "US CRIS", row["invocation_target"], row["status"], row["validation"]]
+            for row in s6
+        ],
+    )
+    print_failure_details(s6)
+
+    # CUR expectations
+    print("\n" + "=" * 140)
+    print("EXPECTED COST AND USAGE REPORT (CUR) ATTRIBUTION")
+    print("=" * 140)
+    print("Scenario 1 successful AIP requests should expose BOTH namespaces:")
+    print(f"  resourceTags/ApplicationShortname = {S1_AIP_APP}")
+    print(f"  resourceTags/AssetID              = {S1_AIP_ASSET}")
+    print(f"  iamPrincipal/ApplicationShortname = {S1_STS_APP}")
+    print(f"  iamPrincipal/AssetID              = {S1_STS_ASSET}")
+    print("\nScenarios 2, 3, and 6 do not use a customer AIP; validate iamPrincipal/* attribution")
+    print("from the corresponding STS session tags.")
+
+    print("\nValidation meanings:")
+    print("  PASS               = expected success and actual success")
+    print("  EXPECTED_FAILURE   = expected unsupported/failure and actual failure")
+    print("  UNEXPECTED_FAILURE = expected success but invocation failed; investigate the printed error")
+    print("  UNEXPECTED_SUCCESS = expected failure but invocation succeeded; expectation/support matrix changed")
 
 
 if __name__ == "__main__":
-    print("\n" + "=" * 110)
+    print("\n" + "=" * 120)
     print("OPENAI BEDROCK SESSION-TAG TEST SUITE")
-    print("=" * 110)
+    print("=" * 120)
 
     show_original_identity()
 
@@ -589,9 +721,10 @@ if __name__ == "__main__":
     for model in MODELS:
         print(
             f"- {model['name']}: "
+            f"DIRECT={model['base_model_id']}, "
             f"US={model['us_model_id']}, "
             f"GLOBAL={model['global_model_id']}, "
-            f"AIP supported={model['aip_supported']}"
+            f"AIP expected={model['aip_supported']}"
         )
 
     s1 = run_scenario1()
@@ -599,12 +732,7 @@ if __name__ == "__main__":
     s3 = run_scenario3()
     s6 = run_scenario6()
 
-    print_results("SCENARIO 1 RESULTS", s1)
-    print_results("SCENARIO 2 RESULTS", s2)
-    print_results("SCENARIO 3 RESULTS", s3)
-    print_results("SCENARIO 6 RESULTS", s6)
-
-    print_expected_cur()
+    print_manager_summary(s1, s2, s3, s6)
 
     print(f"\nCSV output: {OUTPUT_FILE}")
     print("Scenario 1 AIPs created successfully by this script are deleted in finally().")
