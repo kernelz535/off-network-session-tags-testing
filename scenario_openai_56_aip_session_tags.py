@@ -264,7 +264,7 @@ def create_aip(session, model, app_shortname, asset_id):
 
     response = bedrock.create_inference_profile(
         inferenceProfileName=name,
-        description="OpenAI GPT-5.6 AIP + STS session-tag attribution test",
+        description="OpenAI GPT-5.6 AIP STS session-tag attribution test",
         modelSource={"copyFrom": source_arn},
         tags=[
             {"key": "ApplicationShortname", "value": app_shortname},
