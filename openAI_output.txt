@@ -1,0 +1,97 @@
+
+============================================================================================================================================
+OPENAI BEDROCK SESSION-TAG TEST - MANAGER SUMMARY
+============================================================================================================================================
+AWS Region : us-east-1
+IAM Role   : arn:aws:iam::196856463470:role/SandboxServiceRole
+API used   : Amazon Bedrock Runtime Converse
+
+============================================================================================================================================
+SCENARIO 1 - APPLICATION INFERENCE PROFILE (AIP) + STS TAG MISMATCH
+============================================================================================================================================
+WHAT WAS TESTED
+Validate independent AIP resource-tag and STS session-tag attribution on the same Bedrock usage.
+HOW THE MODEL WAS INVOKED
+1. Assume SandboxServiceRole with STS session tags.
+2. Create a customer AIP copied from the model's US geographic CRIS system profile.
+3. Invoke bedrock-runtime.converse(modelId=<CUSTOMER AIP ARN>), not the underlying model ID.
+Flow: US CRIS -> Customer AIP -> Converse(AIP ARN)
+AIP tags: ApplicationShortname=openai-aip, AssetID=MSR06632-OPENAI-AIP
+STS tags: ApplicationShortname=openai-sts, AssetID=MSR99999-OPENAI-STS
++----------------------+-------------------------+----------+---------+------------+
+| Model                | AIP Source              | Expected | Actual  | Validation |
++----------------------+-------------------------+----------+---------+------------+
+| OpenAI GPT-6 Astra   | us.openai.gpt-6-astra   | SUCCESS  | SUCCESS | PASS       |
+| OpenAI GPT-5.6 Terra | us.openai.gpt-5.6-terra | SUCCESS  | SUCCESS | PASS       |
+| OpenAI GPT-5.6 Luna  | us.openai.gpt-5.6-luna  | SUCCESS  | SUCCESS | PASS       |
+| OpenAI GPT-5.6 Sol   | us.openai.gpt-5.6-sol   | SUCCESS  | SUCCESS | PASS       |
++----------------------+-------------------------+----------+---------+------------+
+Actual Converse targets used in Scenario 1:
+- OpenAI GPT-6 Astra: modelId=arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/usohn2cenxdr
+- OpenAI GPT-5.6 Terra: modelId=arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/8gwsu09ccxf3
+- OpenAI GPT-5.6 Luna: modelId=arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/mnm3bilfovhq
+- OpenAI GPT-5.6 Sol: modelId=arn:aws:bedrock:us-east-1:196856463470:application-inference-profile/nrvgqmzo5b0k
+
+============================================================================================================================================
+SCENARIO 2 - STS SESSION TAGS ONLY / NO CUSTOMER AIP
+============================================================================================================================================
+WHAT WAS TESTED
+Validate STS principal/session-tag attribution without a customer AIP.
+HOW THE MODEL WAS INVOKED
+Assume the role with STS tags, then call bedrock-runtime.converse(modelId=<US CRIS ID>),
+for example us.openai.gpt-6-astra. No customer AIP is created or invoked.
+STS tags: ApplicationShortname=openai-sts-only, AssetID=MSR06632-OPENAI-STS
++----------------------+------------+-------------------------+----------+---------+------------+
+| Model                | Invocation | Converse modelId        | Expected | Actual  | Validation |
++----------------------+------------+-------------------------+----------+---------+------------+
+| OpenAI GPT-6 Astra   | US CRIS    | us.openai.gpt-6-astra   | SUCCESS  | SUCCESS | PASS       |
+| OpenAI GPT-5.6 Terra | US CRIS    | us.openai.gpt-5.6-terra | SUCCESS  | SUCCESS | PASS       |
+| OpenAI GPT-5.6 Luna  | US CRIS    | us.openai.gpt-5.6-luna  | SUCCESS  | SUCCESS | PASS       |
+| OpenAI GPT-5.6 Sol   | US CRIS    | us.openai.gpt-5.6-sol   | SUCCESS  | SUCCESS | PASS       |
++----------------------+------------+-------------------------+----------+---------+------------+
+
+============================================================================================================================================
+SCENARIO 3 - DIRECT vs US CRIS vs GLOBAL CRIS USING THE SAME STS SESSION
+============================================================================================================================================
+WHAT WAS TESTED
+Compare three model-ID forms while the IAM role and STS session tags remain unchanged.
+HOW THE MODEL WAS INVOKED
+Every request uses bedrock-runtime.converse(); only modelId changes.
+STS tags: ApplicationShortname=openai-cris-sts, AssetID=MSR06632-OPENAI-CRIS
+
+MODEL ID TYPES
++-------------+-----------------------+----------------------------------------------+
+| Type        | Pattern               | Meaning                                      |
++-------------+-----------------------+----------------------------------------------+
+| DIRECT      | openai.<model>        | Base/direct model ID                         |
+| US_CRIS     | us.openai.<model>     | US geographic cross-Region inference profile |
+| GLOBAL_CRIS | global.openai.<model> | Global cross-Region inference profile        |
++-------------+-----------------------+----------------------------------------------+
+
+RESULTS
++----------------------+-------------+-----------------------------+----------+---------+--------------------+
+| Model                | Type        | Converse modelId            | Expected | Actual  | Validation         |
++----------------------+-------------+-----------------------------+----------+---------+--------------------+
+| OpenAI GPT-6 Astra   | DIRECT      | openai.gpt-6-astra          | FAILURE  | FAILURE | EXPECTED_FAILURE   |
+| OpenAI GPT-6 Astra   | US_CRIS     | us.openai.gpt-6-astra       | SUCCESS  | SUCCESS | PASS               |
+| OpenAI GPT-6 Astra   | GLOBAL_CRIS | global.openai.gpt-6-astra   | SUCCESS  | FAILURE | UNEXPECTED_FAILURE |
+| OpenAI GPT-5.6 Terra | DIRECT      | openai.gpt-5.6-terra        | FAILURE  | FAILURE | EXPECTED_FAILURE   |
+| OpenAI GPT-5.6 Terra | US_CRIS     | us.openai.gpt-5.6-terra     | SUCCESS  | SUCCESS | PASS               |
+| OpenAI GPT-5.6 Terra | GLOBAL_CRIS | global.openai.gpt-5.6-terra | SUCCESS  | FAILURE | UNEXPECTED_FAILURE |
+| OpenAI GPT-5.6 Luna  | DIRECT      | openai.gpt-5.6-luna         | FAILURE  | FAILURE | EXPECTED_FAILURE   |
+| OpenAI GPT-5.6 Luna  | US_CRIS     | us.openai.gpt-5.6-luna      | SUCCESS  | SUCCESS | PASS               |
+| OpenAI GPT-5.6 Luna  | GLOBAL_CRIS | global.openai.gpt-5.6-luna  | SUCCESS  | FAILURE | UNEXPECTED_FAILURE |
+| OpenAI GPT-5.6 Sol   | DIRECT      | openai.gpt-5.6-sol          | FAILURE  | FAILURE | EXPECTED_FAILURE   |
+| OpenAI GPT-5.6 Sol   | US_CRIS     | us.openai.gpt-5.6-sol       | SUCCESS  | SUCCESS | PASS               |
+| OpenAI GPT-5.6 Sol   | GLOBAL_CRIS | global.openai.gpt-5.6-sol   | SUCCESS  | FAILURE | UNEXPECTED_FAILURE |
++----------------------+-------------+-----------------------------+----------+---------+--------------------+
+
+Failure details:
+- OpenAI GPT-6 Astra / DIRECT: An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID openai.gpt-6-astra with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+- OpenAI GPT-6 Astra / GLOBAL_CRIS: An error occurred (AccessDeniedException) when calling the Converse operation: User: arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/OpenAI-Scenario3 is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:::foundation-model/openai.gpt-6-astra with an explicit deny in a service control policy: arn:aws:organizations::691319007355:policy/o-oezy0dd9gc/service_control_policy/p-4i5rkk5u
+- OpenAI GPT-5.6 Terra / DIRECT: An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID openai.gpt-5.6-terra with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+- OpenAI GPT-5.6 Terra / GLOBAL_CRIS: An error occurred (AccessDeniedException) when calling the Converse operation: User: arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/OpenAI-Scenario3 is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:::foundation-model/openai.gpt-5.6-terra with an explicit deny in a service control policy: arn:aws:organizations::691319007355:policy/o-oezy0dd9gc/service_control_policy/p-4i5rkk5u
+- OpenAI GPT-5.6 Luna / DIRECT: An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID openai.gpt-5.6-luna with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+- OpenAI GPT-5.6 Luna / GLOBAL_CRIS: An error occurred (AccessDeniedException) when calling the Converse operation: User: arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/OpenAI-Scenario3 is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:::foundation-model/openai.gpt-5.6-luna with an explicit deny in a service control policy: arn:aws:organizations::691319007355:policy/o-oezy0dd9gc/service_control_policy/p-4i5rkk5u
+- OpenAI GPT-5.6 Sol / DIRECT: An error occurred (ValidationException) when calling the Converse operation: Invocation of model ID openai.gpt-5.6-sol with on-demand throughput isn’t supported. Retry your request with the ID or ARN of an inference profile that contains this model.
+- OpenAI GPT-5.6 Sol / GLOBAL_CRIS: An error occurred (AccessDeniedException) when calling the Converse operation: User: arn:aws:sts::196856463470:assumed-role/SandboxServiceRole/OpenAI-Scenario3 is not authorized to perform: bedrock:InvokeModel on resource: arn:aws:bedrock:::foundation-model/openai.gpt-5.6-sol with an explicit deny in a service control policy: arn:aws:organizations::691319007355:policy/o-oezy0dd9gc/service_control_policy/p-4i5rkk5u
